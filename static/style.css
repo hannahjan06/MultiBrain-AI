@@ -1,0 +1,448 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+:root {
+    --primary-blue: #5B6BEE;
+    --dark-blue: #3E4BDC;
+    --light-gray: #F5F7FA;
+    --text-color-dark: #333;
+    --text-color-light: #666;
+    --border-color: #E0E0E0;
+    --success-green: #4CAF50; /* Added for potential success state */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--light-gray);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.container {
+    display: flex;
+    width: 90%;
+    max-width: 1200px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    min-height: 600px; /* Adjust as needed */
+}
+
+/* Sidebar Styles */
+.sidebar {
+    width: 300px; /* Fixed width for sidebar */
+    background-color: var(--primary-blue);
+    padding: 40px 30px;
+    display: flex;
+    flex-direction: column;
+    color: #fff;
+    position: relative;
+}
+
+.sidebar-title {
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin-bottom: 50px;
+    position: sticky;
+    top: 0;
+}
+
+.steps-container {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    position: relative;
+    padding-left: 15px; /* For the vertical line */
+}
+
+.steps-container::before {
+    content: '';
+    position: absolute;
+    left: 24px; /* Align with circle center */
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: rgba(255, 255, 255, 0.4);
+    z-index: 0;
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    position: relative;
+    z-index: 1; /* Ensure step content is above the line */
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+.step-circle {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%; /* Ensure perfect circle */
+    border: 2px solid rgba(255, 255, 255, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+    background-color: var(--primary-blue);
+    transition: all 0.3s ease;
+    flex-shrink: 0; /* Prevent the circle from squishing */
+}
+
+.step-text {
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.step.active {
+    opacity: 1;
+}
+
+.step.active .step-circle {
+    background-color: #fff;
+    color: var(--primary-blue);
+    border-color: #fff;
+}
+
+/* Main Content Styles */
+.main-content {
+    flex-grow: 1;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.step-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.step-header {
+    font-size: 0.9rem;
+    color: var(--primary-blue);
+    font-weight: 600;
+    letter-spacing: 1px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.main-content h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-color-dark);
+    margin-bottom: 30px;
+}
+
+/* Upload Area Placeholder */
+.upload-area {
+    background-color: var(--light-gray);
+    border: 2px dashed var(--border-color);
+    border-radius: 8px;
+    min-height: 250px; /* Adjust height as needed */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: var(--text-color-light);
+    font-size: 1.1rem;
+    margin-bottom: 30px;
+    /* You would add actual file input and drag/drop styles here */
+}
+
+/* File Type Selection */
+.file-type-selection {
+    margin-bottom: 50px;
+}
+
+.file-type-selection label {
+    font-size: 1rem;
+    color: var(--text-color-dark);
+    font-weight: 500;
+    margin-bottom: 15px;
+    display: block;
+}
+
+.radio-group {
+    display: flex;
+    gap: 30px;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 1rem;
+    color: var(--text-color-light);
+    position: relative;
+    user-select: none; /* Prevent text selection on label click */
+}
+
+.radio-label input[type="radio"] {
+    /* Hide the default radio button visually but keep it accessible */
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none; /* Make sure it doesn't interfere with custom span */
+}
+
+.radio-custom {
+    /* Ensure perfect circular shape */
+    width: 20px;
+    height: 20px;
+    border-radius: 50%; 
+    border: 2px solid var(--border-color);
+    margin-right: 10px;
+    position: relative;
+    transition: all 0.2s ease-in-out;
+    flex-shrink: 0; /* Prevent the custom radio from squishing */
+    display: inline-block; /* Ensure it respects width/height */
+    box-sizing: border-box; /* Include padding/border in width/height */
+}
+
+/* Style for the inner dot when checked */
+.radio-label input[type="radio"]:checked + .radio-custom {
+    border-color: var(--primary-blue);
+}
+
+.radio-label input[type="radio"]:checked + .radio-custom::after {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 50%; /* Ensure perfect circle for the inner dot */
+    background-color: var(--primary-blue);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: block; /* Ensure the dot is visible */
+}
+
+/* Style for the outer circle when not checked (gray) */
+.radio-label input[type="radio"]:not(:checked) + .radio-custom {
+    border-color: #D1D1D1; /* Lighter gray for unchecked state */
+}
+
+/* Buttons */
+.next-step-btn, .dashboard-btn {
+    align-self: flex-end; /* Pushes button to the right */
+    background-color: var(--primary-blue);
+    color: #fff;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 30px;    
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.next-step-btn:hover, .dashboard-btn:hover {
+    background-color: var(--dark-blue);
+    transform: translateY(-2px);
+}
+
+.next-step-btn i, .dashboard-btn i {
+    margin-left: 5px;
+}
+
+/* Hidden Utility Class */
+.hidden {
+    display: none !important;
+}
+
+/* Add to your style.css */
+
+.upload-area {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 30px;
+}
+
+.upload-area.drag-over {
+    border-color: var(--primary-blue);
+    background-color: #e6e9fa; /* Lighter blue background on drag over */
+}
+
+.upload-area .upload-icon {
+    font-size: 3rem;
+    color: var(--border-color);
+    margin-bottom: 15px;
+}
+
+.upload-area p {
+    font-size: 1rem;
+    color: var(--text-color-light);
+    margin-bottom: 5px;
+}
+
+.upload-area .browse-files {
+    color: var(--primary-blue);
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.upload-area .file-info {
+    font-size: 0.9rem;
+    color: var(--text-color-dark);
+    margin-top: 15px;
+    font-weight: 500;
+}
+
+.upload-area .upload-status {
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-top: 10px;
+    color: var(--text-color-dark);
+}
+
+.progress-bar-container {
+    width: 80%;
+    background-color: var(--border-color);
+    height: 8px;
+    border-radius: 4px;
+    margin-top: 20px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background-color: var(--primary-blue); /* Default progress color */
+    border-radius: 4px;
+    transition: width 0.4s ease-in-out, background-color 0.4s ease-in-out;
+}
+
+/* Style for disabled next step button */
+.next-step-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    transform: none;
+}
+.next-step-btn:disabled:hover {
+    background-color: #cccccc; /* Keep the same on hover when disabled */
+    transform: none;
+}
+
+/* Step 4 - Completion Styles */
+#step4 {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+#step4 .success-icon {
+    width: 100px;
+    height: 100px;
+    background-color: var(--primary-blue); /* Changed to primary blue for consistency */
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+#step4 .success-icon i {
+    color: #fff;
+    font-size: 3.5rem;
+}
+
+#step4 h2 {
+    color: var(--primary-blue);
+    margin-bottom: 10px;
+    font-size: 2.2rem;
+}
+
+#step4 p {
+    color: var(--text-color-light);
+    font-size: 1.1rem;
+    margin-bottom: 40px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 900px) {
+    .container {
+        flex-direction: column;
+        width: 100%;
+        max-width: 600px;
+        min-height: unset;
+    }
+
+    .sidebar {
+        width: 100%;
+        padding: 30px 20px;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .sidebar-title {
+        margin-bottom: 0;
+        font-size: 1.4rem;
+    }
+
+    .steps-container {
+        flex-direction: row;
+        gap: 15px;
+        padding-left: 0;
+    }
+
+    .steps-container::before {
+        display: none; /* Hide vertical line on smaller screens */
+    }
+
+    .step-circle {
+        width: 25px;
+        height: 25px;
+        font-size: 0.8rem;
+    }
+
+    .step-text {
+        display: none; /* Hide step text on smaller screens to save space */
+    }
+
+    .main-content {
+        padding: 30px 20px;
+    }
+
+    .next-step-btn, .dashboard-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 500px) {
+    .sidebar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .sidebar-title {
+        margin-bottom: 20px;
+    }
+
+    .steps-container {
+        justify-content: center;
+        width: 100%;
+    }
+}

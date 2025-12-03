@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Summarization Flow</title>
+    <link rel="stylesheet" href="static\style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-title">Start Summarizing</div>
+            <div class="steps-container">
+                <div class="step active" data-step="1">
+                    <div class="step-circle">1</div>
+                    <div class="step-text">Upload File</div>
+                </div>
+                <div class="step" data-step="2">
+                    <div class="step-circle">2</div>
+                    <div class="step-text">Label Speakers</div>
+                </div>
+                <div class="step" data-step="3">
+                    <div class="step-circle">3</div>
+                    <div class="step-text">Finalize details</div>
+                </div>
+                <div class="step" data-step="4">
+                    <div class="step-circle">4</div>
+                    <div class="step-text">Complete</div>
+                </div>
+            </div>
+        </div>
+        <div class="main-content">
+            <div class="step-content" id="step1">
+                <div class="step-header">STEP ONE</div>
+                <h2>Upload Files</h2>
+                <div class="upload-area">
+                    <!-- Placeholder for file upload input -->
+                </div>
+                <div class="file-type-selection">
+                    <label>Select File Type</label>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="fileType" value="transcript" checked>
+                            <span class="radio-custom"></span>
+                            Transcript
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="fileType" value="recording">
+                            <span class="radio-custom"></span>
+                            Recording
+                        </label>
+                    </div>
+                </div>
+                <button class="next-step-btn" data-target-step="2">Next Step <i class="fas fa-arrow-right"></i></button>
+            </div>
+
+            <div class="step-content hidden" id="step2">
+                <div class="step-header">STEP TWO</div>
+                <h2>Label Speakers</h2>
+                <!-- Content for Label Speakers step -->
+                <button class="next-step-btn" data-target-step="3">Next Step <i class="fas fa-arrow-right"></i></button>
+            </div>
+
+            <div class="step-content hidden" id="step3">
+                <div class="step-header">STEP THREE</div>
+                <h2>Finalize details</h2>
+                <!-- Content for Finalize details step -->
+                <button class="next-step-btn" data-target-step="4">Complete <i class="fas fa-arrow-right"></i></button>
+            </div>
+
+            <div class="step-content hidden" id="step4">
+                <div class="success-icon">
+                    <i class="fas fa-check"></i>
+                </div>
+                <h2>Successfully Completed!</h2>
+                <p>You can now close this page and move on to the dashboard</p>
+                <button class="dashboard-btn">Dashboard</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="static\script.js"></script>
+</body>
+</html>
