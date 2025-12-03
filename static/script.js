@@ -210,83 +210,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let draggedEmployee = null;
 
-    document.addEventListener('dragstart', (e) => {
-        if (e.target.classList.contains('employee-item')) {
-            draggedEmployee = e.target;
-            e.dataTransfer.setData('text/plain', e.target.dataset.id); // Use data-id for transfer
-            e.dataTransfer.effectAllowed = 'move';
-            setTimeout(() => {
-                e.target.classList.add('hidden'); // Temporarily hide the dragged item
-            }, 0);
-        }
-    });
-
-    document.addEventListener('dragend', (e) => {
-        if (draggedEmployee) {
-            draggedEmployee.classList.remove('hidden'); // Show the item again
-            draggedEmployee = null;
-        }
-    });
-
-    dropZones.forEach(zone => {
-        zone.addEventListener('dragover', (e) => {
-            e.preventDefault(); // Allow drop
-            e.dataTransfer.dropEffect = 'move';
-            zone.classList.add('drag-over-zone');
-        });
-
-        zone.addEventListener('dragleave', () => {
-            zone.classList.remove('drag-over-zone');
-        });
-
-        zone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            zone.classList.remove('drag-over-zone');
-
-            const employeeId = e.dataTransfer.getData('text/plain');
-            const employeeItem = document.querySelector(`.employee-item[data-id="${employeeId}"]`);
-
-            if (employeeItem && employeeItem.parentNode !== zone) {
-                // If the drop zone already has an item, move it back to available list
-                if (zone.children.length > 0 && zone !== availableEmployeesList) {
-                    const existingItem = zone.querySelector('.employee-item');
-                    if (existingItem) {
-                        availableEmployeesList.appendChild(existingItem);
-                        // Show placeholder in the original zone if it's now empty
-                        if (existingItem.parentNode === availableEmployeesList) {
-                            togglePlaceholder(availableEmployeesList, true, 'Drag employees here');
-                        }
-                    }
-                }
-
-                // Append the dragged employee to the new zone
-                zone.appendChild(employeeItem);
-                employeeItem.classList.remove('hidden'); // Ensure it's visible
-
-                // Manage placeholders
-                togglePlaceholder(zone, false); // Hide placeholder in target zone
-                togglePlaceholder(employeeItem.parentNode, true, 'Drag employee here'); // Show placeholder if origin zone is now empty (if applicable)
-            }
-        });
-    });
-
     // Helper to toggle placeholder visibility
     function togglePlaceholder(zoneElement, show, text = 'Drag employee here') {
         let placeholder = zoneElement.querySelector('.drop-placeholder');
+
+        // The 'Available Employees' list should never have a "Drag here" placeholder
+        if (zoneElement === availableEmployeesList) {
+            if (placeholder) {
+                placeholder.remove();
+            }
+            return;
+        }
+
+        // For other drop zones (tasks)
         if (show) {
-            if (!placeholder && zoneElement !== availableEmployeesList) { // Don't add placeholder to available list
+            // Show placeholder only if the zone is empty and no placeholder exists
+            if (zoneElement.children.length === 0 && !placeholder) {
                 placeholder = document.createElement('p');
                 placeholder.className = 'drop-placeholder';
                 placeholder.textContent = text;
                 zoneElement.appendChild(placeholder);
             }
         } else {
-            if (placeholder) {
+            // Hide/remove placeholder only if an employee item is present
+            if (placeholder && zoneElement.querySelector('.employee-item')) {
                 placeholder.remove();
             }
         }
 
-        // Ensure placeholder is shown if a task drop zone becomes empty
+        // After all operations, if a task drop zone becomes empty, ensure placeholder is there
         if (zoneElement !== availableEmployeesList && zoneElement.children.length === 0) {
             if (!zoneElement.querySelector('.drop-placeholder')) {
                 const newPlaceholder = document.createElement('p');
@@ -298,8 +250,110 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
-    // Initialize placeholders for task drop zones
-    document.querySelectorAll('.meeting-tasks-column .drop-zone').forEach(zone => {
-        togglePlaceholder(zone, true, 'Drag employee here');
+    // Event listener for when an employee item starts being dragged
+    document.addEventListener('dragstart', (e) => {
+        if (e.target.classList.contains('employee-item')) {
+            draggedEmployee = e.target;
+            e.dataTransfer.setData('text/plain', e.target.dataset.id); // Store the employee's unique ID
+            e.dataTransfer.effectAllowed = 'move';
+            setTimeout(() => {
+                e.target.classList.add('hidden'); // Temporarily hide the original dragged item
+            }, 0);
+        }
     });
+
+    // Event listener for when a drag operation ends
+    document.addEventListener('dragend', (e) => {
+        if (draggedEmployee) {
+            // If the item was successfully dropped and moved, it's already in its new place
+            // If it wasn't dropped into a valid new place (e.g., dropped outside a dropzone),
+            // ensure it becomes visible again in its original spot.
+            if (draggedEmployee.classList.contains('hidden')) {
+                draggedEmployee.classList.remove('hidden');
+            }
+            draggedEmployee = null;
+        }
+    });
+
+    // Event listeners for each drop zone
+    dropZones.forEach(zone => {
+        zone.addEventListener('dragover', (e) => {
+            e.preventDefault(); // Allow the drop
+            e.dataTransfer.dropEffect = 'move';
+            zone.classList.add('drag-over-zone');
+            togglePlaceholder(zone, false); // Temporarily hide placeholder when dragging over
+        });
+
+        zone.addEventListener('dragleave', () => {
+            zone.classList.remove('drag-over-zone');
+            togglePlaceholder(zone, true); // Re-show placeholder if leaving an empty zone
+        });
+
+        zone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            zone.classList.remove('drag-over-zone');
+
+            const employeeId = e.dataTransfer.getData('text/plain');
+            const employeeItem = document.querySelector(`.employee-item[data-id="${employeeId}"]`);
+
+            if (employeeItem && employeeItem.parentNode !== zone) {
+                const originalParentZone = employeeItem.parentNode;
+
+                // If the target drop zone already contains an employee item AND it's not the available employees list,
+                // move that existing item back to the 'Available Employees' list.
+                if (zone.children.length > 0 && zone !== availableEmployeesList) {
+                    const existingItemInZone = zone.querySelector('.employee-item');
+                    if (existingItemInZone) {
+                        availableEmployeesList.appendChild(existingItemInZone);
+                        // Ensure placeholder is managed for the zone that just lost its item (if it's a task zone)
+                        togglePlaceholder(zone, true);
+                    }
+                }
+
+                // Append the dragged employee to the new zone
+                zone.appendChild(employeeItem);
+                employeeItem.classList.remove('hidden'); // Ensure it's visible after drop
+
+                // Manage placeholders for the zones involved
+                togglePlaceholder(zone, false); // Hide placeholder in the target zone (because it now has an item)
+                togglePlaceholder(originalParentZone, true); // Show placeholder in the original zone if it's now empty
+            } else if (employeeItem && employeeItem.parentNode === zone) {
+                // If dropping back onto the same parent zone, just make it visible again.
+                employeeItem.classList.remove('hidden');
+            }
+
+            // After all drops, re-evaluate all placeholders to ensure correctness
+            dropZones.forEach(dz => togglePlaceholder(dz, dz.children.length === 0));
+        });
+    });
+
+    // Initial setup:
+    // 1. Ensure 'Available Employees' never shows a placeholder.
+    togglePlaceholder(availableEmployeesList, false);
+
+    // 2. Initialize all task drop zones with placeholders if they are empty.
+    document.querySelectorAll('.meeting-tasks-column .drop-zone').forEach(zone => {
+        togglePlaceholder(zone, zone.children.length === 0);
+    });
+
+    // 3. Attach drag event listeners to pre-existing employee items (if any are loaded with the page)
+    availableEmployeesList.querySelectorAll('.employee-item').forEach(item => {
+        item.addEventListener('dragstart', (e) => {
+            draggedEmployee = e.target;
+            e.dataTransfer.setData('text/plain', e.target.dataset.id);
+            e.dataTransfer.effectAllowed = 'move';
+            setTimeout(() => {
+                e.target.classList.add('hidden');
+            }, 0);
+        });
+        item.addEventListener('dragend', (e) => {
+            if (draggedEmployee) {
+                if (draggedEmployee.classList.contains('hidden')) {
+                    draggedEmployee.classList.remove('hidden');
+                }
+                draggedEmployee = null;
+            }
+        });
+    });
+
 });
