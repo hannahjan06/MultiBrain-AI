@@ -52,13 +52,45 @@
                         </label>
                     </div>
                 </div>
-                <button class="next-step-btn" data-target-step="2">Next Step <i class="fas fa-arrow-right"></i></button>
+                <button class="next-step-btn" data-target-step="2" id="step1NextButton">Next Step <i class="fas fa-arrow-right"></i></button>
             </div>
 
             <div class="step-content hidden" id="step2">
                 <div class="step-header">STEP TWO</div>
                 <h2>Label Speakers</h2>
-                <!-- Content for Label Speakers step -->
+                <div class="drag-drop-container">
+                    <div class="drag-column available-employees-column">
+                        <h3>Available Employees</h3>
+                        <div class="employee-list drop-zone" id="availableEmployees">
+                            <div class="employee-item" draggable="true" data-name="John Doe" data-id="e1">John Doe</div>
+                            <div class="employee-item" draggable="true" data-name="Jane Smith" data-id="e2">Jane Smith</div>
+                            <div class="employee-item" draggable="true" data-name="Peter Jones" data-id="e3">Peter Jones</div>
+                            <div class="employee-item" draggable="true" data-name="Alice Brown" data-id="e4">Alice Brown</div>
+                            <div class="employee-item" draggable="true" data-name="Robert Green" data-id="e5">Robert Green</div>
+                        </div>
+                    </div>
+                    <div class="drag-column meeting-tasks-column">
+                        <h3>Meeting Tasks</h3>
+                        <div class="meeting-task">
+                            <label>Task 1: Present Q3 Report</label>
+                            <div class="drop-zone" id="task1Zone">
+                                <p class="drop-placeholder">Drag employee here</p>
+                            </div>
+                        </div>
+                        <div class="meeting-task">
+                            <label>Task 2: Discuss Marketing Strategy</label>
+                            <div class="drop-zone" id="task2Zone">
+                                <p class="drop-placeholder">Drag employee here</p>
+                            </div>
+                        </div>
+                        <div class="meeting-task">
+                            <label>Task 3: Review Budget Allocations</label>
+                            <div class="drop-zone" id="task3Zone">
+                                <p class="drop-placeholder">Drag employee here</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <button class="next-step-btn" data-target-step="3">Next Step <i class="fas fa-arrow-right"></i></button>
             </div>
 

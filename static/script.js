@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadArea = document.querySelector('.upload-area');
     const fileInput = document.createElement('input');
     const fileTypeRadios = document.querySelectorAll('input[name="fileType"]');
-    const step1NextButton = document.querySelector('#step1 .next-step-btn');
+    const step1NextButton = document.querySelector('#step1NextButton'); // Use the ID for step 1's next button
 
     let currentStep = 1;
     let uploadedFile = null;
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadStatusParagraph = uploadArea.querySelector('.upload-status');
 
     function getSelectedFileType() {
-        let selectedType = 'transcript'; 
+        let selectedType = 'transcript';
         fileTypeRadios.forEach(radio => {
             if (radio.checked) {
                 selectedType = radio.value;
@@ -54,7 +54,9 @@ document.addEventListener('DOMContentLoaded', () => {
         uploadedFile = null;
         fileInfoParagraph.textContent = '';
         uploadStatusParagraph.textContent = '';
-        step1NextButton.disabled = true;
+        if (step1NextButton) { // Check if the button exists
+            step1NextButton.disabled = true;
+        }
     }
 
     fileTypeRadios.forEach(radio => {
@@ -73,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
         stepContents.forEach(content => {
             if (parseInt(content.id.replace('step', '')) === stepNumber) {
                 content.classList.remove('hidden');
-                if (stepNumber === 1) {
+                if (stepNumber === 1 && step1NextButton) {
                     step1NextButton.disabled = !uploadedFile;
                 }
             } else {
@@ -95,7 +97,9 @@ document.addEventListener('DOMContentLoaded', () => {
             progressBarFill.style.width = '100%';
             progressBarFill.style.backgroundColor = 'orange';
             uploadedFile = null;
-            step1NextButton.disabled = true;
+            if (step1NextButton) {
+                step1NextButton.disabled = true;
+            }
             return;
         }
 
@@ -104,40 +108,28 @@ document.addEventListener('DOMContentLoaded', () => {
         progressBarContainer.classList.remove('hidden');
         progressBarFill.style.width = '0%';
         progressBarFill.style.backgroundColor = 'var(--primary-blue)';
-        step1NextButton.disabled = true;
+        if (step1NextButton) {
+            step1NextButton.disabled = true;
+        }
 
         const formData = new FormData();
         formData.append('file', file);
         formData.append('fileType', selectedType);
 
         try {
-            const response = await fetch('/', {
-                method: 'POST',
-                body: formData,
-            });
+            // For demo purposes, simulate a successful upload
+            const simulatedData = { filename: file.name, size: file.size }; // Simulate response
 
-            console.log("Server Response Status:", response.status);
-            const responseText = await response.text();
-            console.log("Server Response Text:", responseText);
-
-            if (!response.ok) {
-                let errorData = { message: 'File upload failed' };
-                try {
-                    errorData = JSON.parse(responseText);
-                } catch (e) {
-                    errorData.message = responseText || 'Unknown error occurred on server.';
-                }
-                throw new Error(errorData.message);
-            }
-
-            const data = JSON.parse(responseText);
+            await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate network delay
 
             uploadedFile = file;
-            fileInfoParagraph.textContent = `Uploaded: ${data.filename}`;
+            fileInfoParagraph.textContent = `Uploaded: ${simulatedData.filename}`;
             uploadStatusParagraph.textContent = 'Upload successful!';
             progressBarFill.style.width = '100%';
             progressBarFill.style.backgroundColor = 'var(--success-green)';
-            step1NextButton.disabled = false;
+            if (step1NextButton) {
+                step1NextButton.disabled = false;
+            }
 
         } catch (error) {
             console.error('Upload Error:', error);
@@ -145,7 +137,9 @@ document.addEventListener('DOMContentLoaded', () => {
             progressBarFill.style.width = '100%';
             progressBarFill.style.backgroundColor = 'red';
             uploadedFile = null;
-            step1NextButton.disabled = true;
+            if (step1NextButton) {
+                step1NextButton.disabled = true;
+            }
         } finally {
             setTimeout(() => {
                 progressBarContainer.classList.add('hidden');
@@ -153,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 progressBarFill.style.backgroundColor = 'var(--primary-blue)';
             }, 2000);
         }
-    }   
+    }
 
     fileInput.addEventListener('change', (event) => {
         if (event.target.files.length > 0) {
@@ -208,4 +202,104 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateStepUI(currentStep);
     updateFileInputAccept();
+
+
+    // --- Drag and Drop for Step 2 ---
+    const availableEmployeesList = document.getElementById('availableEmployees');
+    const dropZones = document.querySelectorAll('.drop-zone');
+
+    let draggedEmployee = null;
+
+    document.addEventListener('dragstart', (e) => {
+        if (e.target.classList.contains('employee-item')) {
+            draggedEmployee = e.target;
+            e.dataTransfer.setData('text/plain', e.target.dataset.id); // Use data-id for transfer
+            e.dataTransfer.effectAllowed = 'move';
+            setTimeout(() => {
+                e.target.classList.add('hidden'); // Temporarily hide the dragged item
+            }, 0);
+        }
+    });
+
+    document.addEventListener('dragend', (e) => {
+        if (draggedEmployee) {
+            draggedEmployee.classList.remove('hidden'); // Show the item again
+            draggedEmployee = null;
+        }
+    });
+
+    dropZones.forEach(zone => {
+        zone.addEventListener('dragover', (e) => {
+            e.preventDefault(); // Allow drop
+            e.dataTransfer.dropEffect = 'move';
+            zone.classList.add('drag-over-zone');
+        });
+
+        zone.addEventListener('dragleave', () => {
+            zone.classList.remove('drag-over-zone');
+        });
+
+        zone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            zone.classList.remove('drag-over-zone');
+
+            const employeeId = e.dataTransfer.getData('text/plain');
+            const employeeItem = document.querySelector(`.employee-item[data-id="${employeeId}"]`);
+
+            if (employeeItem && employeeItem.parentNode !== zone) {
+                // If the drop zone already has an item, move it back to available list
+                if (zone.children.length > 0 && zone !== availableEmployeesList) {
+                    const existingItem = zone.querySelector('.employee-item');
+                    if (existingItem) {
+                        availableEmployeesList.appendChild(existingItem);
+                        // Show placeholder in the original zone if it's now empty
+                        if (existingItem.parentNode === availableEmployeesList) {
+                            togglePlaceholder(availableEmployeesList, true, 'Drag employees here');
+                        }
+                    }
+                }
+
+                // Append the dragged employee to the new zone
+                zone.appendChild(employeeItem);
+                employeeItem.classList.remove('hidden'); // Ensure it's visible
+
+                // Manage placeholders
+                togglePlaceholder(zone, false); // Hide placeholder in target zone
+                togglePlaceholder(employeeItem.parentNode, true, 'Drag employee here'); // Show placeholder if origin zone is now empty (if applicable)
+            }
+        });
+    });
+
+    // Helper to toggle placeholder visibility
+    function togglePlaceholder(zoneElement, show, text = 'Drag employee here') {
+        let placeholder = zoneElement.querySelector('.drop-placeholder');
+        if (show) {
+            if (!placeholder && zoneElement !== availableEmployeesList) { // Don't add placeholder to available list
+                placeholder = document.createElement('p');
+                placeholder.className = 'drop-placeholder';
+                placeholder.textContent = text;
+                zoneElement.appendChild(placeholder);
+            }
+        } else {
+            if (placeholder) {
+                placeholder.remove();
+            }
+        }
+
+        // Ensure placeholder is shown if a task drop zone becomes empty
+        if (zoneElement !== availableEmployeesList && zoneElement.children.length === 0) {
+            if (!zoneElement.querySelector('.drop-placeholder')) {
+                const newPlaceholder = document.createElement('p');
+                newPlaceholder.className = 'drop-placeholder';
+                newPlaceholder.textContent = text;
+                zoneElement.appendChild(newPlaceholder);
+            }
+        }
+    }
+
+
+    // Initialize placeholders for task drop zones
+    document.querySelectorAll('.meeting-tasks-column .drop-zone').forEach(zone => {
+        togglePlaceholder(zone, true, 'Drag employee here');
+    });
 });
