@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employees</title>
+    <link rel="stylesheet" href="static/employee.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fas fa-brain"></i> MultiBrain
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="/"><i class="fas fa-th-large"></i> Dashboard</a></li>
+                    <li><a href="/auto_assign"><i class="fas fa-file-alt"></i> Transcribe</a></li>
+                    <li class="active"><a href="/employees_page"><i class="fas fa-users"></i> Employees</a></li>
+                    <li><a href="#"><i class="fas fa-tasks"></i> Manage Tasks</a></li>
+                    <li><a href="#"><i class="fas fa-user-circle"></i> Profile</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="content-header">
+                <div class="header-top">
+                    <div class="search-bar">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" placeholder="Search">
+                    </div>
+                </div>
+
+                <div class="employee-header-section">
+                    <h2>Employees (<span id="employee-count">0</span>)</h2>
+                    <div class="employee-controls">
+                        <button class="control-btn active">List</button>
+                        <button class="add-employee-btn" id="add-employee-btn"><i class="fas fa-plus"></i> Add Employee</button>
+                    </div>
+                </div>
+            </header>
+
+            <section class="employee-grid" id="employee-grid">
+                <!-- Employee cards will be dynamically inserted here -->
+            </section>
+
+            <!-- Add Employee Modal -->
+            <div id="addEmployeeModal" class="modal">
+                <div class="modal-content">
+                    <span class="close-button">&times;</span>
+                    <h2>Add New Employee</h2>
+                    <form id="addEmployeeForm">
+                        <div class="form-group">
+                            <label for="employeeName">Name</label>
+                            <input type="text" id="employeeName" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="employeeRole">Role</label>
+                            <input type="text" id="employeeRole" name="role" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="employeePosition">Position</label>
+                            <input type="text" id="employeePosition" name="position">
+                        </div>
+                        <div class="form-group">
+                            <label for="employeeEmail">Email</label>
+                            <input type="email" id="employeeEmail" name="email" required>
+                        </div>
+                        <button type="submit" class="submit-employee-btn">Add Employee</button>
+                    </form>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="static/employee.js"></script>
+    <script src="static/dash.js"></script> <!-- Keep dash.js for sidebar active state if desired -->
+</body>
+</html>

@@ -1,0 +1,500 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --primary-blue: #5B6DFF;
+    --light-blue: #E0E7FF;
+    --dark-text: #333;
+    --medium-text: #666;
+    --light-text: #999;
+    --border-color: #eee;
+    --card-bg: #fff;
+    --sidebar-bg: #6a7eff;
+    --sidebar-link-hover: #5263d6;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    --header-bg: #fdfdfd;
+    --employee-card-border: #f0f0f0;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f4f7f6;
+    color: var(--dark-text);
+    line-height: 1.6;
+}
+
+.dashboard-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar Styling - Copied from dash.css, ensure consistency */
+.sidebar {
+    width: 250px;
+    background-color: var(--sidebar-bg);
+    color: #fff;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar .logo {
+    height: 60px;
+    background-color: rgba(255, 255, 255, 0.1);
+    margin: 0 20px 30px 20px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1.2em;
+}
+
+.sidebar .main-nav ul {
+    list-style: none;
+}
+
+.sidebar .main-nav ul li a {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.0em;
+    transition: background-color 0.2s ease, padding-left 0.2s ease;
+}
+
+.sidebar .main-nav ul li a i {
+    margin-right: 15px;
+    font-size: 1.2em;
+}
+
+.sidebar .main-nav ul li.active a,
+.sidebar .main-nav ul li a:hover {
+    background-color: var(--sidebar-link-hover);
+    padding-left: 25px;
+    border-left: 4px solid #fff;
+}
+
+.sidebar-bottom {
+    margin-top: auto; /* Pushes content to the bottom */
+    padding: 20px;
+    text-align: center;
+}
+
+.support-box {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.support-img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.support-btn {
+    background-color: #fff;
+    color: var(--primary-blue);
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 0.9em;
+    font-weight: 500;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.2s ease;
+}
+
+.support-btn:hover {
+    background-color: var(--light-blue);
+}
+
+.logout-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    text-decoration: none;
+    font-size: 1em;
+    padding: 10px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+}
+
+.logout-link i {
+    margin-right: 10px;
+}
+
+.logout-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+
+/* Main Content Styling */
+.main-content {
+    flex-grow: 1;
+    padding: 30px;
+    background-color: #fcfcfc;
+}
+
+/* Header Top Section (Search and User) */
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    background-color: var(--header-bg);
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.search-bar {
+    position: relative;
+    width: 400px;
+}
+
+.search-bar input {
+    width: 100%;
+    padding: 10px 15px 10px 40px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.95em;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.search-bar input:focus {
+    border-color: var(--primary-blue);
+}
+
+.search-bar .search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--light-text);
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+}
+
+.notification-icon {
+    font-size: 1.4em;
+    color: var(--medium-text);
+    margin-right: 25px;
+    cursor: pointer;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    background-color: var(--card-bg);
+    padding: 8px 15px;
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+}
+
+.user-profile .user-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 10px;
+    object-fit: cover;
+}
+
+.user-profile span {
+    font-weight: 500;
+    color: var(--dark-text);
+}
+
+/* Employee Header Section (Title and Controls) */
+.employee-header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.employee-header-section h2 {
+    font-size: 1.8em;
+    color: var(--dark-text);
+    font-weight: 600;
+}
+
+.employee-controls {
+    display: flex;
+    align-items: center;
+}
+
+.control-btn {
+    background-color: transparent;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    color: var(--medium-text);
+    cursor: pointer;
+    margin-right: 10px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.control-btn.active {
+    background-color: var(--primary-blue);
+    color: #fff;
+}
+
+.control-btn:hover:not(.active) {
+    background-color: var(--light-blue);
+    color: var(--primary-blue);
+}
+
+.filter-btn {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.9em;
+    color: var(--medium-text);
+    cursor: pointer;
+    margin-right: 15px;
+    transition: background-color 0.2s ease;
+}
+
+.filter-btn:hover {
+    background-color: var(--light-blue);
+    border-color: var(--primary-blue);
+    color: var(--primary-blue);
+}
+
+.add-employee-btn {
+    background-color: var(--primary-blue);
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 0.95em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.add-employee-btn i {
+    margin-right: 8px;
+}
+
+.add-employee-btn:hover {
+    background-color: var(--sidebar-link-hover);
+    transform: translateY(-2px);
+}
+
+/* Employee Grid */
+.employee-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+}
+
+.employee-card {
+    background-color: var(--card-bg);
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--employee-card-border);
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.employee-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+.employee-card .avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 auto 15px auto;
+    border: 3px solid var(--primary-blue);
+    background-color: var(--light-blue); /* Fallback */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5em; /* For icon avatars */
+    color: var(--primary-blue);
+}
+
+.employee-card .name {
+    font-size: 1.2em;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: var(--dark-text);
+}
+
+.employee-card .role {
+    font-size: 0.95em;
+    color: var(--medium-text);
+    margin-bottom: 10px;
+}
+
+.employee-card .tags {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.employee-card .tag {
+    background-color: var(--light-blue);
+    color: var(--primary-blue);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    font-weight: 500;
+    margin: 0 5px;
+}
+
+/* MODIFIED: Employee Card Stats Grid */
+.employee-card .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* Changed from 3 to 2 columns */
+    gap: 15px;
+    padding-top: 20px;
+    border-top: 1px solid var(--employee-card-border);
+    margin-top: 20px;
+}
+
+.employee-card .stat-item {
+    text-align: center; /* This already centers the text within each item */
+}
+
+.employee-card .stat-value {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: var(--dark-text);
+    margin-bottom: 3px;
+}
+
+.employee-card .stat-label {
+    font-size: 0.8em;
+    color: var(--light-text);
+}
+
+
+/* Modal Styles */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: auto; /* Centered */
+    padding: 30px;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    position: relative;
+    animation-name: animatetop;
+    animation-duration: 0.4s;
+}
+
+/* Add Animation */
+@keyframes animatetop {
+    from {top: -300px; opacity: 0}
+    to {top: 0; opacity: 1}
+}
+
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    top: 15px;
+    right: 25px;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal-content h2 {
+    margin-bottom: 25px;
+    color: var(--dark-text);
+    font-size: 1.8em;
+    font-weight: 600;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--medium-text);
+}
+
+.form-group input[type="text"],
+.form-group input[type="email"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1em;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="email"]:focus {
+    border-color: var(--primary-blue);
+}
+
+.submit-employee-btn {
+    background-color: var(--primary-blue);
+    color: #fff;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-size: 1.05em;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.2s ease;
+}
+
+.submit-employee-btn:hover {
+    background-color: var(--sidebar-link-hover);
+}

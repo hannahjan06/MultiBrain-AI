@@ -4,18 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-    <link rel="stylesheet" href="static/dash.css"> <!-- Corrected path if needed -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="static/dash.css">
 </head>
 <body>
     <div class="dashboard-container">
         <aside class="sidebar">
-            <div class="logo"></div> <!-- Placeholder for a logo -->
+            <div class="logo">
+                <i class="fas fa-brain"></i> MultiBrain
+            </div>
             <nav class="main-nav">
                 <ul>
                     <li class="active"><a href="/" id="dashboardLink"><i class="fas fa-th-large"></i> Dashboard</a></li>
                     <li><a href="/auto_assign" id="transcribeLink"><i class="fas fa-file-alt"></i> Transcribe</a></li>
-                    <li><a href="#" id="employeesLink"><i class="fas fa-users"></i> Employees</a></li>
+                    <li><a href="/employees_page" id="employeesLink"><i class="fas fa-users"></i> Employees</a></li>
                     <li><a href="#" id="manageTasksLink"><i class="fas fa-tasks"></i> Manage Tasks</a></li>
                     <li><a href="#" id="profileLink"><i class="fas fa-user-circle"></i> Profile</a></li>
                 </ul>
@@ -23,46 +25,73 @@
         </aside>
 
         <main class="main-content">
-            <header class="content-header">
-                <h2>Assigned Tasks</h2>
-            </header>
+            <div class="welcome-message">
+                <h1>Welcome back, Evan!</h1>
+                <p>Here's a summary of your activities:</p>
+            </div>
 
-            <section class="assigned-tasks">
-                <div class="task-card">
-                    <p class="task-title">Task 20: Review and approve the proposed marketing strategy</p>
-                    <p class="task-assignee">Assignee: John Doe</p>
-                    <span class="task-status pending">Pending</span>
+            <div class="top-sections-grid">
+                <!-- Workload Section -->
+                <section class="dashboard-card workload-section">
+                    <div class="card-header">
+                        <h3>Workload</h3>
+                        <a href="#" class="view-all-link">View All</a>
+                    </div>
+                    <div class="workload-list" id="top-employees-grid">
+                        <!-- Employee items will be dynamically inserted here -->
+                    </div>
+                </section>
+
+                <!-- Nearest Events Section -->
+                <section class="dashboard-card nearest-events-section">
+                    <div class="card-header">
+                        <h3>Nearest Events</h3>
+                        <a href="#" class="view-all-link">View All</a>
+                    </div>
+                    <div class="event-list">
+                        <div class="event-item">
+                            <div class="event-details">
+                                <p class="event-title">Presentation of the new department</p>
+                                <span class="event-time">Today | 3:00 PM</span>
+                            </div>
+                            <span class="event-tag orange">Work</span>
+                        </div>
+                        <div class="event-item">
+                            <div class="event-details">
+                                <p class="event-title">Anna's Birthday</p>
+                                <span class="event-time">Today | 6:00 PM</span>
+                            </div>
+                            <span class="event-tag blue">Social</span>
+                        </div>
+                        <div class="event-item">
+                            <div class="event-details">
+                                <p class="event-title">Ray's Meeting</p>
+                                <span class="event-time">Tomorrow | 2:00 PM</span>
+                            </div>
+                            <span class="event-tag green">Meeting</span>
+                        </div>
+                        <!-- More events can be added here -->
+                    </div>
+                </section>
+            </div> <!-- End top-sections-grid -->
+
+            <!-- Tasks Section -->
+            <section class="dashboard-card tasks-section full-width-task-section">
+                <div class="card-header">
+                    <h3>Tasks</h3>
+                    <a href="#" class="view-all-link">View All</a>
                 </div>
-                <div class="task-card">
-                    <p class="task-title">Task 21: Conduct market research to identify potential customers</p>
-                    <p class="task-assignee">Assignee: Robert Green</p>
-                    <span class="task-status pending">Pending</span>
+                <div class="task-list" id="assigned-tasks-list">
+                    <!-- Tasks will be dynamically inserted here -->
                 </div>
-                <div class="task-card">
-                    <p class="task-title">Task 22: Finalize the budget for the marketing campaign</p>
-                    <p class="task-assignee">Assignee: Alice Brown</p>
-                    <span class="task-status completed">Complete</span>
-                </div>
-                <button class="see-more-btn">See more</button>
+                <button class="add-task-btn" id="autoAssignBtn">
+                    <i class="fas fa-plus"></i> Auto Assign New Task
+                </button>
             </section>
 
-            <section class="auto-assign-promo">
-                <i class="fas fa-star promo-icon"></i>
-                <p>Use MultiBrain AI to automatically assign your tasks</p>
-                <!-- The JavaScript will handle the redirection for this button -->
-                <button class="auto-assign-btn">Auto assign <i class="fas fa-arrow-right"></i></button>
-            </section>
-
-            <header class="content-header">
-                <h2>Top Employees</h2>
-            </header>
-
-            <section class="top-employees-grid" id="top-employees-grid">
-                <!-- Employee cards will be dynamically inserted here by JavaScript -->
-            </section>
         </main>
     </div>
 
-    <script src="static/dash.js"></script> <!-- Make sure this path is correct -->
+    <script src="static/dash.js"></script>
 </body>
 </html>

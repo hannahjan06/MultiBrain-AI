@@ -99,15 +99,39 @@ class Task(db.Model):
     deadline = db.Column(db.String(120), nullable=True) 
     source_quotes = db.Column(db.Text, nullable=True)
     assigned_employee_id = db.Column(db.Integer, db.ForeignKey('employees.id'))
+    status = db.Column(db.String(20), nullable=False, default='pending')
 
 class Employee(db.Model):
     __tablename__ = 'employees'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(255))
+    position = db.Column(db.String(120))
     email = db.Column(db.String(255))
 
     tasks = db.relationship('Task', backref='assigned_employee', lazy=True)
+
+    def to_dict_with_stats(self):
+        pending = 0
+        completed = 0
+
+        for t in self.tasks:
+            if t.status == 'pending':
+                pending += 1
+            elif t.status == 'complete':
+                completed += 1
+            else:
+                print(f"Warning: Task with unknown status '{t.status}' for task ID {t.id}")
+        
+        return {
+            'id': self.id,
+            'name': self.name,
+            'role': self.role,
+            'position': self.position,
+            'email': self.email,
+            'total_pending_tasks': pending,
+            'total_completed_tasks': completed,
+        }
 
 def allowed_filename(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -125,6 +149,10 @@ def is_text_file(filename):
 @app.route('/', methods=['GET'])
 def dashboard():
     return render_template('dash.html')
+
+@app.route('/employees_page', methods=['GET'])
+def employees_page():
+    return render_template('employee.html')
 
 @app.route('/auto_assign', methods=['GET'])
 def auto_assign():
@@ -259,11 +287,7 @@ def upload_file():
 @app.route('/employees', methods=['GET'])
 def get_employees():
     employees = Employee.query.all()
-    employees_data = [
-        {'id': emp.id, 'name': emp.name, 'role': emp.role, 'email': emp.email}
-        for emp in employees
-    ]
-    return jsonify(employees_data)
+    return jsonify([e.to_dict_with_stats() for e in employees]), 200
 
 @app.route('/assignments', methods=['POST'])
 def save_assignments():

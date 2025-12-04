@@ -8,13 +8,18 @@
     --light-text: #999;
     --border-color: #eee;
     --card-bg: #fff;
-    --pending-bg: #ffe0e6;
-    --pending-text: #ff6b81;
-    --completed-bg: #e0ffe0;
-    --completed-text: #4CAF50;
-    --sidebar-bg: #6a7eff; /* A slightly different blue for the sidebar */
+    --sidebar-bg: #6a7eff;
     --sidebar-link-hover: #5263d6;
     --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    --header-bg: #fdfdfd;
+    --tag-orange: #ffe0b2;
+    --tag-orange-text: #ff9800;
+    --tag-blue: #bbdefb;
+    --tag-blue-text: #2196F3;
+    --tag-green: #c8e6c9;
+    --tag-green-text: #4CAF50;
+    --activity-highlight: var(--primary-blue);
+    --activity-time-color: #aaa;
 }
 
 * {
@@ -35,7 +40,7 @@ body {
     min-height: 100vh;
 }
 
-/* Sidebar Styling (No changes needed for this issue) */
+/* Sidebar Styling - No change */
 .sidebar {
     width: 250px;
     background-color: var(--sidebar-bg);
@@ -48,7 +53,7 @@ body {
 
 .sidebar .logo {
     height: 60px;
-    background-color: rgba(255, 255, 255, 0.1); /* Placeholder for a logo area */
+    background-color: rgba(255, 255, 255, 0.1);
     margin: 0 20px 30px 20px;
     border-radius: 8px;
     display: flex;
@@ -56,6 +61,10 @@ body {
     justify-content: center;
     font-weight: 600;
     font-size: 1.2em;
+}
+
+.sidebar .logo i {
+    margin-right: 10px;
 }
 
 .sidebar .main-nav ul {
@@ -84,211 +93,391 @@ body {
     border-left: 4px solid #fff;
 }
 
-/* Main Content Styling (No changes needed for this issue) */
+.sidebar-bottom {
+    margin-top: auto;
+    padding: 20px;
+    text-align: center;
+}
+
+.support-box {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.support-img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.support-btn {
+    background-color: #fff;
+    color: var(--primary-blue);
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 0.9em;
+    font-weight: 500;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.2s ease;
+}
+
+.support-btn:hover {
+    background-color: var(--light-blue);
+}
+
+.logout-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    text-decoration: none;
+    font-size: 1em;
+    padding: 10px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+}
+
+.logout-link i {
+    margin-right: 10px;
+}
+
+.logout-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Main Content Styling - No change */
 .main-content {
     flex-grow: 1;
     padding: 30px;
     background-color: #fcfcfc;
+    display: flex;
+    flex-direction: column;
 }
 
-.content-header {
-    margin-bottom: 25px;
-    padding-bottom: 15px;
+/* Header Top Section (Search and User) - No change */
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    background-color: var(--header-bg);
+    padding-bottom: 20px;
     border-bottom: 1px solid var(--border-color);
 }
 
-.content-header h2 {
-    font-size: 1.8em;
-    color: var(--dark-text);
-    font-weight: 600;
+.search-bar {
+    position: relative;
+    width: 400px;
 }
 
-/* Assigned Tasks Section */
-.assigned-tasks {
-    background-color: var(--card-bg);
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: var(--shadow);
-    margin-bottom: 30px;
-}
-
-.task-card {
-    display: flex;
-    /* justify-content: space-between; */ /* Removed to allow more control with flex-grow */
-    align-items: center;
-    padding: 18px 0;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.task-card:last-of-type {
-    border-bottom: none;
-    margin-bottom: 20px; /* Space before see more button */
-}
-
-.task-title {
-    font-size: 1.05em;
-    font-weight: 500;
-    color: var(--dark-text);
-    flex-grow: 1; /* Allows title to take up available space */
-}
-
-/* Modified for better alignment */
-.task-assignee {
-    font-size: 0.9em;
-    color: var(--medium-text);
-    margin-left: 20px;
-    /* Use fixed width and text alignment for consistent look */
-    min-width: 150px; /* Ensure enough space for longer names */
-    text-align: right; /* Align assignee name to the right */
-    padding-right: 15px; /* Add some padding between name and status */
-    flex-shrink: 0; /* Prevent it from shrinking */
-}
-
-.task-status {
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-size: 0.85em;
-    font-weight: 600;
-    text-align: center;
-    width: 90px; /* Fixed width for the status bubble */
-    flex-shrink: 0; /* Prevent it from shrinking */
-    margin-left: auto; /* Push it to the far right, overriding previous margin-left in task-assignee */
-}
-
-.task-status.pending {
-    background-color: var(--pending-bg);
-    color: var(--pending-text);
-}
-
-.task-status.completed {
-    background-color: var(--completed-bg);
-    color: var(--completed-text);
-}
-
-.see-more-btn {
-    background-color: var(--primary-blue);
-    color: #fff;
-    border: none;
-    padding: 12px 25px;
-    border-radius: 8px;
-    font-size: 1em;
-    cursor: pointer;
-    display: block;
-    margin: 20px auto 0 auto; /* Center the button */
-    transition: background-color 0.2s ease, transform 0.2s ease;
-}
-
-.see-more-btn:hover {
-    background-color: var(--sidebar-link-hover);
-    transform: translateY(-2px);
-}
-
-/* Auto Assign Promo Section (No changes needed for this issue) */
-.auto-assign-promo {
-    display: flex;
-    align-items: center;
-    background-color: var(--light-blue);
-    padding: 20px 30px;
-    border-radius: 12px;
-    margin-bottom: 30px;
-    box-shadow: var(--shadow);
-}
-
-.promo-icon {
-    font-size: 1.8em;
-    color: var(--primary-blue);
-    margin-right: 20px;
-}
-
-.auto-assign-promo p {
-    flex-grow: 1;
-    font-size: 1.05em;
-    color: var(--dark-text);
-    font-weight: 500;
-}
-
-.auto-assign-btn {
-    background-color: var(--card-bg);
-    color: var(--primary-blue);
-    border: 1px solid var(--primary-blue);
-    padding: 10px 20px;
+.search-bar input {
+    width: 100%;
+    padding: 10px 15px 10px 40px;
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     font-size: 0.95em;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.search-bar input:focus {
+    border-color: var(--primary-blue);
+}
+
+.search-bar .search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--light-text);
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+}
+
+.notification-icon {
+    font-size: 1.4em;
+    color: var(--medium-text);
+    margin-right: 25px;
     cursor: pointer;
+}
+
+.user-profile {
     display: flex;
     align-items: center;
-    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-}
-
-.auto-assign-btn i {
-    margin-left: 10px;
-    font-size: 0.9em;
-}
-
-.auto-assign-btn:hover {
-    background-color: var(--primary-blue);
-    color: #fff;
-}
-
-/* Top Employees Section (No changes needed for this issue) */
-.top-employees-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* Responsive grid */
-    gap: 20px;
-    margin-top: 25px;
-}
-
-.employee-card {
     background-color: var(--card-bg);
-    padding: 20px;
-    border-radius: 12px;
+    padding: 8px 15px;
+    border-radius: 20px;
     box-shadow: var(--shadow);
-    text-align: center;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
 }
 
-.employee-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-}
-
-.employee-avatar {
-    width: 70px;
-    height: 70px;
+.user-profile .user-avatar {
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
-    background-color: var(--light-blue); /* Placeholder for avatar */
-    color: var(--primary-blue);
-    font-size: 2.2em;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 15px auto;
-    border: 3px solid var(--primary-blue);
+    margin-right: 10px;
+    object-fit: cover;
 }
 
-.employee-name {
-    font-size: 1.1em;
+.user-profile span {
+    font-weight: 500;
+    color: var(--dark-text);
+}
+
+/* Welcome Message - No change */
+.welcome-message {
+    margin-bottom: 30px;
+}
+
+.welcome-message h1 {
+    font-size: 2.2em;
     font-weight: 600;
     color: var(--dark-text);
     margin-bottom: 5px;
 }
 
-.employee-position {
-    font-size: 0.9em;
+.welcome-message p {
+    font-size: 1em;
     color: var(--medium-text);
-    margin-bottom: 15px;
 }
 
-.employee-stats {
-    background-color: #f7faff;
-    padding: 10px 15px;
-    border-radius: 8px;
-    font-size: 0.9em;
+/* NEW: Top Sections Grid (Workload & Events) */
+.top-sections-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Two equal columns */
+    gap: 30px;
+    margin-bottom: 30px; /* Space between top sections and tasks below */
+}
+
+.dashboard-card {
+    background-color: var(--card-bg);
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.card-header h3 {
+    font-size: 1.3em;
+    font-weight: 600;
     color: var(--dark-text);
+}
+
+.view-all-link {
+    font-size: 0.9em;
+    color: var(--primary-blue);
+    text-decoration: none;
     font-weight: 500;
 }
 
-.employee-stats span {
-    color: var(--primary-blue);
+.view-all-link:hover {
+    text-decoration: underline;
+}
+
+/* Workload Section (Top Employees) - No major layout change needed, just removal of grid-column */
+.workload-section {
+    /* Removed grid-column: 1; as it's now part of top-sections-grid */
+}
+
+.workload-list .employee-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.workload-list .employee-item:last-of-type {
+    border-bottom: none;
+}
+
+.workload-list .employee-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 15px;
+    border: 2px solid var(--primary-blue);
+}
+
+.workload-list .employee-details {
+    flex-grow: 1;
+}
+
+.workload-list .employee-name {
+    font-size: 1.05em;
+    font-weight: 500;
+    color: var(--dark-text);
+}
+
+.workload-list .employee-position {
+    font-size: 0.85em;
+    color: var(--medium-text);
+}
+
+.workload-list .completed-tasks {
+    font-size: 0.95em;
     font-weight: 600;
+    color: var(--primary-blue);
+}
+
+/* Nearest Events Section - No major layout change needed, just removal of grid-column */
+.nearest-events-section {
+    /* Removed grid-column: 3; as it's now part of top-sections-grid */
+}
+
+.nearest-events-section .event-list .event-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.nearest-events-section .event-list .event-item:last-of-type {
+    border-bottom: none;
+}
+
+.nearest-events-section .event-details {
+    flex-grow: 1;
+}
+
+.nearest-events-section .event-title {
+    font-size: 1.0em;
+    font-weight: 500;
+    color: var(--dark-text);
+    margin-bottom: 3px;
+}
+
+.nearest-events-section .event-time {
+    font-size: 0.85em;
+    color: var(--light-text);
+}
+
+.nearest-events-section .event-tag {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    font-weight: 500;
+    margin-left: 15px;
+}
+
+.nearest-events-section .event-tag.orange {
+    background-color: var(--tag-orange);
+    color: var(--tag-orange-text);
+}
+
+.nearest-events-section .event-tag.blue {
+    background-color: var(--tag-blue);
+    color: var(--tag-blue-text);
+}
+
+.nearest-events-section .event-tag.green {
+    background-color: var(--tag-green);
+    color: var(--tag-green-text);
+}
+
+/* Tasks Section - Now full width */
+.tasks-section {
+    /* Removed grid-column: 2; and flex-grow: 1; as it's now naturally below and full width */
+}
+
+/* NEW: Styles for the tasks section to be full width */
+.full-width-task-section {
+    width: 100%; /* Ensure it spans the full width available in main-content */
+}
+
+.task-list {
+    flex-grow: 1;
+}
+
+.task-list .task-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.task-list .task-item:last-of-type {
+    border-bottom: none;
+}
+
+.task-list .task-priority-indicator {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-right: 15px;
+}
+
+.task-list .priority-high { background-color: #ff6b81; }
+.task-list .priority-medium { background-color: #ffc107; }
+.task-list .priority-low { background-color: #4CAF50; }
+
+.task-list .task-details {
+    flex-grow: 1;
+}
+
+.task-list .task-name {
+    font-size: 1.0em;
+    font-weight: 500;
+    color: var(--dark-text);
+}
+
+.task-list .task-date {
+    font-size: 0.85em;
+    color: var(--light-text);
+}
+
+.task-list .task-assignee-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-left: 15px;
+    border: 1px solid var(--border-color);
+}
+
+.add-task-btn {
+    background-color: var(--primary-blue);
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 0.95em;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.add-task-btn i {
+    margin-right: 8px;
+}
+
+.add-task-btn:hover {
+    background-color: var(--sidebar-link-hover);
+    transform: translateY(-2px);
 }
