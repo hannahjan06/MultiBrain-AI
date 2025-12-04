@@ -18,6 +18,8 @@ document.addEventListener('DOMContentLoaded', () => {
     fileInput.type = 'file';
     fileInput.accept = allowedExtensions[getSelectedFileType()];
     fileInput.style.display = 'none';
+
+
     uploadArea.innerHTML = `
         <i class="fas fa-cloud-upload-alt upload-icon"></i>
         <p>Drag & Drop files here or <span class="browse-files">Browse files</span></p>
@@ -84,8 +86,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (employeeItem) {
                             availableEmployeesList.removeChild(employeeItem);
                             dropZone.appendChild(employeeItem);
-                            employeeItem.classList.remove('hidden'); 
-                            togglePlaceholder(dropZone, false); 
+                            employeeItem.classList.remove('hidden');
+                            togglePlaceholder(dropZone, false);
                         }
                     }
                 }
@@ -127,7 +129,33 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     });
                     console.log('Collected Assignments:', assignments);
-                    updateStepUI(targetStep);
+
+                    try {
+                        const response = await fetch('/assignments', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ assignments: assignments }),
+                        });
+
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.error || 'Failed to save assignments');
+                        }
+
+                        const result = await response.json();
+                        if (result.success) {
+                            console.log('Assignments saved successfully!');
+                            updateStepUI(targetStep);
+                        } else {
+                            alert('Failed to save assignments: ' + (result.error || 'Unknown error'));
+                        }
+                    } catch (error) {
+                        console.error('Error sending assignments:', error);
+                        alert('An error occurred while saving assignments: ' + error.message);
+                    }
+
                 }
                 else {
                     updateStepUI(targetStep);
@@ -135,6 +163,56 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    async function fetchAssignmentsForStep3() {
+    try {
+        const response = await fetch('/get_final_assignments');
+        if (!response.ok) {
+            throw new Error('Failed to fetch final assignments');
+        }
+        const finalAssignments = await response.json();
+        return finalAssignments;
+    } catch (error) {
+        console.error('Error fetching final assignments:', error);
+        return [];
+    }
+    }
+
+    function renderStep3Content(assignments) {
+        const step3ContentDiv = document.querySelector('#step3');
+        let assignmentsHtml = '<h3>Review Assignments</h3><div class="assignments-review-container">';
+
+        if (assignments && assignments.length > 0) {
+            assignments.forEach(task => {
+                const assigneeName = task.assignee ? task.assignee.name : 'Unassigned';
+                assignmentsHtml += `
+                    <div class="assignment-item">
+                        <p class="task-description"><strong>Task ${task.id}:</strong> ${task.description}</p>
+                        <p class="assignee-name"><strong>Assignee:</strong> ${assigneeName}</p>
+                    </div>
+                `;
+            });
+        } else {
+            assignmentsHtml += '<p>No tasks or assignments to review.</p>';
+        }
+        assignmentsHtml += '</div>';
+
+        const existingReviewContainer = step3ContentDiv.querySelector('.assignments-review-container');
+        if (existingReviewContainer) {
+            existingReviewContainer.remove();
+        }
+        const existingReviewHeader = step3ContentDiv.querySelector('h3');
+        if (existingReviewHeader) {
+            existingReviewHeader.remove();
+        }
+
+        const nextButton = step3ContentDiv.querySelector('.next-step-btn');
+        if (nextButton) {
+            nextButton.insertAdjacentHTML('beforebegin', assignmentsHtml);
+        } else {
+            step3ContentDiv.innerHTML += assignmentsHtml;
+        }
+    }
 
     function updateFileInputAccept() {
         const selectedType = getSelectedFileType();
@@ -167,6 +245,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 content.classList.remove('hidden');
                 if (stepNumber === 1 && step1NextButton) {
                     step1NextButton.disabled = !uploadedFile;
+                } else if (stepNumber === 3) {
+                    fetchAssignmentsForStep3().then(assignments => {
+                        renderStep3Content(assignments);
+                    });
                 }
             } else {
                 content.classList.add('hidden');
@@ -191,8 +273,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function initializeDraggableEmployees() {
-        document.querySelectorAll('.employee-item').forEach(item => { 
-            item.removeEventListener('dragstart', handleDragStart); 
+        document.querySelectorAll('.employee-item').forEach(item => {
+            item.removeEventListener('dragstart', handleDragStart);
             item.removeEventListener('dragend', handleDragEnd);
             item.addEventListener('dragstart', handleDragStart);
             item.addEventListener('dragend', handleDragEnd);
@@ -220,7 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function initializeDropZones() {
         const dropZones = document.querySelectorAll('.drop-zone');
         dropZones.forEach(zone => {
-            zone.removeEventListener('dragover', handleDragOver); 
+            zone.removeEventListener('dragover', handleDragOver);
             zone.removeEventListener('dragleave', handleDragLeave);
             zone.removeEventListener('drop', handleDrop);
 
@@ -253,14 +335,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const employeeId = e.dataTransfer.getData('text/plain');
         const employeeItem = document.querySelector(`.employee-item[data-id="${employeeId}"]`);
 
-        if (employeeItem && employeeItem !== currentDropZone) { 
+        if (employeeItem && employeeItem !== currentDropZone) {
             const originalParentZone = employeeItem.parentNode;
 
             if (currentDropZone.dataset.taskId) {
                 const existingItemInZone = currentDropZone.querySelector('.employee-item');
                 if (existingItemInZone) {
                     availableEmployeesList.appendChild(existingItemInZone);
-                    togglePlaceholder(availableEmployeesList, false); 
+                    togglePlaceholder(availableEmployeesList, false);
                     existingItemInZone.classList.remove('hidden');
                 }
             }
@@ -426,4 +508,4 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-}); 
+});

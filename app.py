@@ -1,16 +1,19 @@
 import os
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, session
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
 import requests
 import json
 import whisper
 import warnings
+import dotenv
+dotenv.load_dotenv()
 
 warnings.filterwarnings("ignore", message="FP16 is not supported on CPU*")
 
 app = Flask(__name__)
 
+app.config['SECRET_KEY'] = os.getenv('UNIQUE_KEY', 'default_secret_key')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///multibrain.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -64,7 +67,7 @@ def analyse_transcipt(text):
         },
         timeout = 120
     )
-    
+
     response.raise_for_status()
     raw = response.json()
 
@@ -206,6 +209,8 @@ def upload_file():
     db.session.add(meeting)
     db.session.flush()
 
+    session['current_meeting_id'] = meeting.id
+
     tasks_from_ai = analysis_json.get('tasks', [])
     saved_tasks = []
 
@@ -255,6 +260,71 @@ def get_employees():
         for emp in employees
     ]
     return jsonify(employees_data)
+
+@app.route('/assignments', methods=['POST'])
+def save_assignments():
+    data = request.json
+    assignments = data.get('assignments', {})
+
+    if not isinstance(assignments, dict):
+        return jsonify({'success': False, 'error': 'Invalid assignments format'}), 400
+    
+    try:
+        for task_id_str, employee_id_str in assignments.items():
+            try:
+                task_id = int(task_id_str)
+                employee_id = int(employee_id_str)
+            except ValueError:
+                print(f"Warning: Could not convert task_id_str='{task_id_str}' or employee_id_str='{employee_id_str}' to int. Skipping.")
+                continue
+            
+            task = Task.query.get(task_id)
+            if not task:
+                print(f"Warning: Task with ID {task_id} not found. Skipping assignment.")
+                continue
+
+            employee = Employee.query.get(employee_id)
+            if not employee:
+                print(f"Warning: Employee with ID {employee_id} not found. Skipping assignment for task {task_id}.")
+                continue
+
+            task.assigned_employee_id = employee_id
+        
+        db.session.commit()
+        return jsonify({'success': True}), 200
+    except Exception as e:
+        db.session.rollback()
+        print('Error saving assignments:', e)
+        return jsonify({'success': False, 'error': 'Server error while saving assignments'}), 500
+    
+@app.route('/get_final_assignments', methods=['GET'])
+def get_final_assignments():
+    current_meeting_id = session.get('current_meeting_id')
+    if not current_meeting_id:
+        return jsonify({'error': 'No active meeting ID found in session. Please upload a file first.'}), 400
+
+    tasks = Task.query.filter_by(meeting_id=current_meeting_id).all()
+
+    final_assignments = []
+    for task in tasks:
+        assignee_info = None
+        if task.assigned_employee_id:
+            employee = Employee.query.get(task.assigned_employee_id)
+            if employee:
+                assignee_info = {'id': employee.id, 'name': employee.name, 'role': employee.role}
+        elif task.ai_assignee:
+            assignee_info = {'name': task.ai_assignee, 'ai_suggestion': True}
+
+        final_assignments.append({
+            'id': task.id,
+            'description': task.description,
+            'deadline': task.deadline,
+            'ai_assignee': task.ai_assignee,
+            'assigned_employee_id': task.assigned_employee_id,
+            'assignee': assignee_info
+        })
+
+    return jsonify(final_assignments)
 
 if __name__ == '__main__':
     with app.app_context():

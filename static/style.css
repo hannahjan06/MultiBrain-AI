@@ -7,8 +7,8 @@
     --text-color-dark: #333;
     --text-color-light: #666;
     --border-color: #E0E0E0;
-    --success-green: #4CAF50; 
-    --drag-hover-bg: #e0e7ff; 
+    --success-green: #4CAF50;
+    --drag-hover-bg: #e0e7ff;
     --dragged-item-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     --drop-zone-border: #D1D1D1;
     --drop-zone-hover-border: var(--primary-blue);
@@ -37,7 +37,7 @@ body {
     border-radius: 12px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
     overflow: hidden;
-    min-height: 600px; 
+    min-height: 600px;
 }
 
 .sidebar {
@@ -69,7 +69,7 @@ body {
 .steps-container::before {
     content: '';
     position: absolute;
-    left: 24px; 
+    left: 24px;
     top: 0;
     bottom: 0;
     width: 2px;
@@ -82,7 +82,7 @@ body {
     align-items: center;
     gap: 15px;
     position: relative;
-    z-index: 1; 
+    z-index: 1;
     opacity: 0.7;
     transition: opacity 0.3s ease;
 }
@@ -90,7 +90,7 @@ body {
 .step-circle {
     width: 30px;
     height: 30px;
-    border-radius: 50%; 
+    border-radius: 50%;
     border: 2px solid rgba(255, 255, 255, 0.7);
     display: flex;
     justify-content: center;
@@ -99,7 +99,7 @@ body {
     font-weight: 600;
     background-color: var(--primary-blue);
     transition: all 0.3s ease;
-    flex-shrink: 0; 
+    flex-shrink: 0;
 }
 
 .step-text {
@@ -153,6 +153,7 @@ body {
     border-radius: 8px;
     min-height: 250px;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     color: var(--text-color-light);
@@ -298,7 +299,6 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-top: auto;
 }
 
 .next-step-btn:hover, .dashboard-btn:hover {
@@ -325,9 +325,13 @@ body {
 }
 
 #step4 {
+    flex-grow: 1; 
+    display: flex;
+    flex-direction: column; 
     align-items: center;
     justify-content: center;
     text-align: center;
+    gap: 15px; 
 }
 
 #step4 .success-icon {
@@ -338,7 +342,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 0;
 }
 
 #step4 .success-icon i {
@@ -348,14 +352,56 @@ body {
 
 #step4 h2 {
     color: var(--primary-blue);
-    margin-bottom: 10px;
+    margin-bottom: 0;
     font-size: 2.2rem;
 }
 
 #step4 p {
     color: var(--text-color-light);
     font-size: 1.1rem;
-    margin-bottom: 40px;
+    margin-bottom: 0;
+}
+
+#step4 .dashboard-btn {
+    margin-top: 20px;
+    align-self: center;
+}
+
+
+.assignments-review-container {
+    margin-top: 30px;
+    margin-bottom: 30px;
+    background-color: var(--light-gray);
+    border-radius: 8px;
+    padding: 20px;
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.assignment-item {
+    background-color: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.assignment-item .task-description {
+    font-size: 1rem;
+    color: var(--text-color-dark);
+}
+
+.assignment-item .assignee-name {
+    font-size: 0.95rem;
+    color: var(--text-color-light);
+}
+
+.assignment-item .assignee-name strong {
+    color: var(--primary-blue);
 }
 
 .drag-drop-container {
@@ -452,7 +498,7 @@ body {
     align-items: center;
     padding: 10px;
     transition: background-color 0.2s ease, border-color 0.2s ease;
-    overflow: hidden; 
+    overflow: hidden;
     position: relative;
 }
 
@@ -465,12 +511,12 @@ body {
     color: var(--text-color-light);
     font-style: italic;
     font-size: 0.9rem;
-    pointer-events: none; 
+    pointer-events: none;
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 100%; 
+    width: 100%;
     text-align: center;
     padding: 0 5px;
     box-sizing: border-box;
@@ -478,7 +524,7 @@ body {
 
 .drop-zone .employee-item {
     margin: 0;
-    width: 100%; 
+    width: 100%;
 }
 
 @media (max-width: 900px) {
