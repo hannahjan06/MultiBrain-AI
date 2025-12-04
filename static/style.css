@@ -7,8 +7,8 @@
     --text-color-dark: #333;
     --text-color-light: #666;
     --border-color: #E0E0E0;
-    --success-green: #4CAF50; /* Added for potential success state */
-    --drag-hover-bg: #e0e7ff; /* Light blue for drag hover */
+    --success-green: #4CAF50; 
+    --drag-hover-bg: #e0e7ff; 
     --dragged-item-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     --drop-zone-border: #D1D1D1;
     --drop-zone-hover-border: var(--primary-blue);
@@ -37,12 +37,11 @@ body {
     border-radius: 12px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
     overflow: hidden;
-    min-height: 600px; /* Adjust as needed */
+    min-height: 600px; 
 }
 
-/* Sidebar Styles */
 .sidebar {
-    width: 300px; /* Fixed width for sidebar */
+    width: 300px;
     background-color: var(--primary-blue);
     padding: 40px 30px;
     display: flex;
@@ -64,13 +63,13 @@ body {
     flex-direction: column;
     gap: 30px;
     position: relative;
-    padding-left: 15px; /* For the vertical line */
+    padding-left: 15px;
 }
 
 .steps-container::before {
     content: '';
     position: absolute;
-    left: 24px; /* Align with circle center */
+    left: 24px; 
     top: 0;
     bottom: 0;
     width: 2px;
@@ -83,7 +82,7 @@ body {
     align-items: center;
     gap: 15px;
     position: relative;
-    z-index: 1; /* Ensure step content is above the line */
+    z-index: 1; 
     opacity: 0.7;
     transition: opacity 0.3s ease;
 }
@@ -91,7 +90,7 @@ body {
 .step-circle {
     width: 30px;
     height: 30px;
-    border-radius: 50%; /* Ensure perfect circle */
+    border-radius: 50%; 
     border: 2px solid rgba(255, 255, 255, 0.7);
     display: flex;
     justify-content: center;
@@ -100,7 +99,7 @@ body {
     font-weight: 600;
     background-color: var(--primary-blue);
     transition: all 0.3s ease;
-    flex-shrink: 0; /* Prevent the circle from squishing */
+    flex-shrink: 0; 
 }
 
 .step-text {
@@ -118,7 +117,6 @@ body {
     border-color: #fff;
 }
 
-/* Main Content Styles */
 .main-content {
     flex-grow: 1;
     padding: 40px;
@@ -149,24 +147,22 @@ body {
     margin-bottom: 30px;
 }
 
-/* Upload Area Placeholder */
 .upload-area {
     background-color: var(--light-gray);
     border: 2px dashed var(--border-color);
     border-radius: 8px;
-    min-height: 250px; /* Adjust height as needed */
+    min-height: 250px;
     display: flex;
     justify-content: center;
     align-items: center;
     color: var(--text-color-light);
     font-size: 1.1rem;
     margin-bottom: 30px;
-    /* You would add actual file input and drag/drop styles here */
 }
 
 .upload-area.drag-over {
     border-color: var(--primary-blue);
-    background-color: #e6e9fa; /* Lighter blue background on drag over */
+    background-color: #e6e9fa;
 }
 
 .upload-area .upload-icon {
@@ -214,12 +210,11 @@ body {
 .progress-bar-fill {
     height: 100%;
     width: 0%;
-    background-color: var(--primary-blue); /* Default progress color */
+    background-color: var(--primary-blue);
     border-radius: 4px;
     transition: width 0.4s ease-in-out, background-color 0.4s ease-in-out;
 }
 
-/* File Type Selection */
 .file-type-selection {
     margin-bottom: 50px;
 }
@@ -244,7 +239,7 @@ body {
     font-size: 1rem;
     color: var(--text-color-light);
     position: relative;
-    user-select: none; /* Prevent text selection on label click */
+    user-select: none;
 }
 
 .radio-label input[type="radio"] {
@@ -289,7 +284,6 @@ body {
     border-color: #D1D1D1;
 }
 
-/* Buttons */
 .next-step-btn, .dashboard-btn {
     align-self: flex-end;
     background-color: var(--primary-blue);
@@ -304,8 +298,7 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-top: auto; /* Push button to the bottom */
-}
+    margin-top: auto;
 
 .next-step-btn:hover, .dashboard-btn:hover {
     background-color: var(--dark-blue);
@@ -326,12 +319,10 @@ body {
     margin-left: 5px;
 }
 
-/* Hidden Utility Class */
 .hidden {
     display: none !important;
 }
 
-/* Step 4 - Completion Styles */
 #step4 {
     align-items: center;
     justify-content: center;
@@ -366,7 +357,6 @@ body {
     margin-bottom: 40px;
 }
 
-/* Drag and Drop Specific Styles (Step 2) */
 .drag-drop-container {
     display: flex;
     gap: 20px;
@@ -382,7 +372,7 @@ body {
     border-radius: 8px;
     display: flex;
     flex-direction: column;
-    min-height: 400px; /* Increased height for better visibility */
+    min-height: 400px;
 }
 
 .drag-column h3 {
@@ -414,7 +404,7 @@ body {
     color: var(--text-color-dark);
     font-weight: 500;
     transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
-    display: flex; /* Allow icon next to name */
+    display: flex;
     justify-content: space-between;
     align-items: center;
     width: 100%;
@@ -430,10 +420,9 @@ body {
     box-shadow: var(--dragged-item-shadow);
 }
 
-/* For the 'Meeting Tasks' column */
 .meeting-tasks-column {
-    gap: 15px; /* Space between tasks */
-    background-color: #fdfdff; /* Slightly different background */
+    gap: 15px;
+    background-color: #fdfdff;
     border: 1px solid var(--border-color);
 }
 
@@ -456,13 +445,13 @@ body {
 .drop-zone {
     border: 2px dashed var(--drop-zone-border);
     border-radius: 6px;
-    min-height: 60px; /* Sufficient height for one item */
+    min-height: 60px;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 10px;
     transition: background-color 0.2s ease, border-color 0.2s ease;
-    overflow: hidden; /* Prevent content from breaking dashed border */
+    overflow: hidden; 
     position: relative;
 }
 
@@ -475,7 +464,7 @@ body {
     color: var(--text-color-light);
     font-style: italic;
     font-size: 0.9rem;
-    pointer-events: none; /* Make sure it doesn't block drop event */
+    pointer-events: none; 
     position: absolute;
     top: 50%;
     left: 50%;
@@ -487,11 +476,10 @@ body {
 }
 
 .drop-zone .employee-item {
-    margin: 0; /* Remove margin when inside drop zone */
-    width: 100%; /* Take full width of drop zone */
+    margin: 0;
+    width: 100%; 
 }
 
-/* Responsive Adjustments */
 @media (max-width: 900px) {
     .container {
         flex-direction: column;
@@ -521,7 +509,7 @@ body {
     }
 
     .steps-container::before {
-        display: none; /* Hide vertical line on smaller screens */
+        display: none;
     }
 
     .step-circle {
@@ -531,7 +519,7 @@ body {
     }
 
     .step-text {
-        display: none; /* Hide step text on smaller screens to save space */
+        display: none;
     }
 
     .main-content {
@@ -544,7 +532,7 @@ body {
     }
 
     .drag-drop-container {
-        flex-direction: column; /* Stack columns on smaller screens */
+        flex-direction: column;
     }
 }
 
@@ -562,4 +550,5 @@ body {
         justify-content: center;
         width: 100%;
     }
+}
 }

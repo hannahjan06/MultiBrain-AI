@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadArea = document.querySelector('.upload-area');
     const fileInput = document.createElement('input');
     const fileTypeRadios = document.querySelectorAll('input[name="fileType"]');
-    const step1NextButton = document.querySelector('#step1NextButton'); // Use the ID for step 1's next button
+    const step1NextButton = document.querySelector('#step1NextButton');
 
     let currentStep = 1;
     let uploadedFile = null;
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
         uploadedFile = null;
         fileInfoParagraph.textContent = '';
         uploadStatusParagraph.textContent = '';
-        if (step1NextButton) { // Check if the button exists
+        if (step1NextButton) {
             step1NextButton.disabled = true;
         }
     }
@@ -117,10 +117,9 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('fileType', selectedType);
 
         try {
-            // For demo purposes, simulate a successful upload
-            const simulatedData = { filename: file.name, size: file.size }; // Simulate response
+            const simulatedData = { filename: file.name, size: file.size };
 
-            await new Promise(resolve => setTimeout(resolve, 1500)); // Simulate network delay
+            await new Promise(resolve => setTimeout(resolve, 1500));
 
             uploadedFile = file;
             fileInfoParagraph.textContent = `Uploaded: ${simulatedData.filename}`;
@@ -203,18 +202,14 @@ document.addEventListener('DOMContentLoaded', () => {
     updateStepUI(currentStep);
     updateFileInputAccept();
 
-
-    // --- Drag and Drop for Step 2 ---
     const availableEmployeesList = document.getElementById('availableEmployees');
     const dropZones = document.querySelectorAll('.drop-zone');
 
     let draggedEmployee = null;
 
-    // Helper to toggle placeholder visibility
     function togglePlaceholder(zoneElement, show, text = 'Drag employee here') {
         let placeholder = zoneElement.querySelector('.drop-placeholder');
 
-        // The 'Available Employees' list should never have a "Drag here" placeholder
         if (zoneElement === availableEmployeesList) {
             if (placeholder) {
                 placeholder.remove();
@@ -222,9 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // For other drop zones (tasks)
         if (show) {
-            // Show placeholder only if the zone is empty and no placeholder exists
             if (zoneElement.children.length === 0 && !placeholder) {
                 placeholder = document.createElement('p');
                 placeholder.className = 'drop-placeholder';
@@ -232,13 +225,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 zoneElement.appendChild(placeholder);
             }
         } else {
-            // Hide/remove placeholder only if an employee item is present
             if (placeholder && zoneElement.querySelector('.employee-item')) {
                 placeholder.remove();
             }
         }
 
-        // After all operations, if a task drop zone becomes empty, ensure placeholder is there
         if (zoneElement !== availableEmployeesList && zoneElement.children.length === 0) {
             if (!zoneElement.querySelector('.drop-placeholder')) {
                 const newPlaceholder = document.createElement('p');
@@ -249,25 +240,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-
-    // Event listener for when an employee item starts being dragged
     document.addEventListener('dragstart', (e) => {
         if (e.target.classList.contains('employee-item')) {
             draggedEmployee = e.target;
-            e.dataTransfer.setData('text/plain', e.target.dataset.id); // Store the employee's unique ID
-            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', e.target.dataset.id); 
             setTimeout(() => {
-                e.target.classList.add('hidden'); // Temporarily hide the original dragged item
+                e.target.classList.add('hidden');
             }, 0);
         }
     });
 
-    // Event listener for when a drag operation ends
     document.addEventListener('dragend', (e) => {
         if (draggedEmployee) {
-            // If the item was successfully dropped and moved, it's already in its new place
-            // If it wasn't dropped into a valid new place (e.g., dropped outside a dropzone),
-            // ensure it becomes visible again in its original spot.
             if (draggedEmployee.classList.contains('hidden')) {
                 draggedEmployee.classList.remove('hidden');
             }
@@ -278,15 +262,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event listeners for each drop zone
     dropZones.forEach(zone => {
         zone.addEventListener('dragover', (e) => {
-            e.preventDefault(); // Allow the drop
+            e.preventDefault();
             e.dataTransfer.dropEffect = 'move';
             zone.classList.add('drag-over-zone');
-            togglePlaceholder(zone, false); // Temporarily hide placeholder when dragging over
+            togglePlaceholder(zone, false);
         });
 
         zone.addEventListener('dragleave', () => {
             zone.classList.remove('drag-over-zone');
-            togglePlaceholder(zone, true); // Re-show placeholder if leaving an empty zone
+            togglePlaceholder(zone, true);
         });
 
         zone.addEventListener('drop', (e) => {
@@ -299,44 +283,33 @@ document.addEventListener('DOMContentLoaded', () => {
             if (employeeItem && employeeItem.parentNode !== zone) {
                 const originalParentZone = employeeItem.parentNode;
 
-                // If the target drop zone already contains an employee item AND it's not the available employees list,
-                // move that existing item back to the 'Available Employees' list.
                 if (zone.children.length > 0 && zone !== availableEmployeesList) {
                     const existingItemInZone = zone.querySelector('.employee-item');
                     if (existingItemInZone) {
                         availableEmployeesList.appendChild(existingItemInZone);
-                        // Ensure placeholder is managed for the zone that just lost its item (if it's a task zone)
                         togglePlaceholder(zone, true);
                     }
                 }
 
-                // Append the dragged employee to the new zone
                 zone.appendChild(employeeItem);
-                employeeItem.classList.remove('hidden'); // Ensure it's visible after drop
+                employeeItem.classList.remove('hidden'); 
 
-                // Manage placeholders for the zones involved
-                togglePlaceholder(zone, false); // Hide placeholder in the target zone (because it now has an item)
-                togglePlaceholder(originalParentZone, true); // Show placeholder in the original zone if it's now empty
+                togglePlaceholder(zone, false); 
+                togglePlaceholder(originalParentZone, true); 
             } else if (employeeItem && employeeItem.parentNode === zone) {
-                // If dropping back onto the same parent zone, just make it visible again.
                 employeeItem.classList.remove('hidden');
             }
 
-            // After all drops, re-evaluate all placeholders to ensure correctness
             dropZones.forEach(dz => togglePlaceholder(dz, dz.children.length === 0));
         });
     });
 
-    // Initial setup:
-    // 1. Ensure 'Available Employees' never shows a placeholder.
     togglePlaceholder(availableEmployeesList, false);
 
-    // 2. Initialize all task drop zones with placeholders if they are empty.
     document.querySelectorAll('.meeting-tasks-column .drop-zone').forEach(zone => {
         togglePlaceholder(zone, zone.children.length === 0);
     });
 
-    // 3. Attach drag event listeners to pre-existing employee items (if any are loaded with the page)
     availableEmployeesList.querySelectorAll('.employee-item').forEach(item => {
         item.addEventListener('dragstart', (e) => {
             draggedEmployee = e.target;
