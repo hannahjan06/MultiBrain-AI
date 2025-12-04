@@ -123,10 +123,14 @@ def is_text_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'txt', 'pdf', 'docx'}
 
 @app.route('/', methods=['GET'])
-def index():
+def dashboard():
+    return render_template('dash.html')
+
+@app.route('/auto_assign', methods=['GET'])
+def auto_assign():
     return render_template('index.html')
 
-@app.route('/', methods=['POST'])
+@app.route('/auto_assign', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
         return jsonify({'success': False, 'message': 'No file in request'}), 400

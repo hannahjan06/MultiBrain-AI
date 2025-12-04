@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const topEmployeesGrid = document.getElementById('top-employees-grid');
+    const autoAssignBtn = document.querySelector('.auto-assign-btn'); // Get the Auto assign button
+    const sidebarLinks = document.querySelectorAll('.sidebar .main-nav ul li a'); // All sidebar links
 
     const employees = [
         { name: 'Michael Scott', position: 'Regional Manager', completedAssignments: 45 },
@@ -7,9 +9,6 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: 'Pam Beesly', position: 'Office Administrator', completedAssignments: 38 },
         { name: 'Jim Halpert', position: 'Sales Representative', completedAssignments: 35 },
     ];
-
-    // Sort employees by completed assignments in descending order (already sorted in this example)
-    // employees.sort((a, b) => b.completedAssignments - a.completedAssignments);
 
     // Take the top 5
     const top5Employees = employees.slice(0, 5);
@@ -31,16 +30,31 @@ document.addEventListener('DOMContentLoaded', () => {
         topEmployeesGrid.appendChild(employeeCard);
     });
 
-    // Optional: Add active class to sidebar link based on current page (for a multi-page setup)
-    const sidebarLinks = document.querySelectorAll('.sidebar .main-nav ul li a');
+    // Add click listener for the Auto Assign button
+    autoAssignBtn.addEventListener('click', () => {
+        window.location.href = '/auto_assign'; // Redirect to the /auto_assign route
+    });
+
+    // Add click listener for sidebar links
     sidebarLinks.forEach(link => {
         link.addEventListener('click', function(event) {
             // Remove active from all
             sidebarLinks.forEach(item => item.parentElement.classList.remove('active'));
             // Add active to clicked one
             this.parentElement.classList.add('active');
-            // Prevent default link behavior for demonstration
-            event.preventDefault();
+
+            // Prevent default link behavior for demonstration IF not a specific navigation link
+            // For Dashboard and Transcribe, we want to navigate
+            if (this.textContent.includes('Dashboard')) {
+                window.location.href = '/'; // Go to the dashboard
+            } else if (this.textContent.includes('Transcribe')) {
+                window.location.href = '/auto_assign'; // Go to the auto_assign page (which handles transcription)
+            } else {
+                // For other links, prevent default behavior if they are just placeholders
+                event.preventDefault();
+                console.log(`Clicked on: ${this.textContent.trim()}`);
+                // You might want to add more specific routing here for other sidebar items
+            }
         });
     });
 });
