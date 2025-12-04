@@ -299,6 +299,7 @@ body {
     align-items: center;
     gap: 8px;
     margin-top: auto;
+}
 
 .next-step-btn:hover, .dashboard-btn:hover {
     background-color: var(--dark-blue);
@@ -550,5 +551,4 @@ body {
         justify-content: center;
         width: 100%;
     }
-}
 }

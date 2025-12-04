@@ -3,22 +3,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const stepContents = document.querySelectorAll('.step-content');
     const nextStepButtons = document.querySelectorAll('.next-step-btn');
     const uploadArea = document.querySelector('.upload-area');
-    const fileInput = document.createElement('input');
     const fileTypeRadios = document.querySelectorAll('input[name="fileType"]');
     const step1NextButton = document.querySelector('#step1NextButton');
 
-    let currentStep = 1;
-    let uploadedFile = null;
+    const availableEmployeesList = document.getElementById('availableEmployees');
+    let draggedEmployee = null;
 
     const allowedExtensions = {
         transcript: '.txt,.pdf,.docx',
         recording: '.mp3,.wav'
     };
 
+    const fileInput = document.createElement('input');
     fileInput.type = 'file';
     fileInput.accept = allowedExtensions[getSelectedFileType()];
     fileInput.style.display = 'none';
-
     uploadArea.innerHTML = `
         <i class="fas fa-cloud-upload-alt upload-icon"></i>
         <p>Drag & Drop files here or <span class="browse-files">Browse files</span></p>
@@ -36,6 +35,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const progressBarFill = uploadArea.querySelector('.progress-bar-fill');
     const uploadStatusParagraph = uploadArea.querySelector('.upload-status');
 
+    let currentStep = 1;
+    let uploadedFile = null;
+
     function getSelectedFileType() {
         let selectedType = 'transcript';
         fileTypeRadios.forEach(radio => {
@@ -45,6 +47,94 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         return selectedType;
     }
+
+    function renderStep2Content(tasks, employees) {
+        const meetingTasksColumn = document.querySelector('.meeting-tasks-column');
+        meetingTasksColumn.innerHTML = '<h3>Meeting Tasks</h3>';
+
+        availableEmployeesList.innerHTML = '';
+        employees.forEach(employee => {
+            const employeeItem = document.createElement('div');
+            employeeItem.className = 'employee-item';
+            employeeItem.draggable = true;
+            employeeItem.dataset.name = employee.name;
+            employeeItem.dataset.id = employee.id;
+            employeeItem.textContent = employee.name;
+            availableEmployeesList.appendChild(employeeItem);
+        });
+
+        if (tasks && tasks.length > 0) {
+            tasks.forEach(task => {
+                const taskDiv = document.createElement('div');
+                taskDiv.className = 'meeting-task';
+                taskDiv.innerHTML = `
+                    <label>Task ${task.id}: ${task.description}</label>
+                    <div class="drop-zone" id="task${task.id}Zone" data-task-id="${task.id}">
+                        <p class="drop-placeholder">Drag employee here</p>
+                    </div>
+                `;
+                meetingTasksColumn.appendChild(taskDiv);
+
+                if (task.ai_assignee) {
+                    const assigneeEmployee = employees.find(emp => emp.name === task.ai_assignee);
+                    if (assigneeEmployee) {
+                        const dropZone = taskDiv.querySelector('.drop-zone');
+                        const employeeItem = availableEmployeesList.querySelector(`.employee-item[data-id="${assigneeEmployee.id}"]`);
+
+                        if (employeeItem) {
+                            availableEmployeesList.removeChild(employeeItem);
+                            dropZone.appendChild(employeeItem);
+                            employeeItem.classList.remove('hidden'); 
+                            togglePlaceholder(dropZone, false); 
+                        }
+                    }
+                }
+            });
+        } else {
+            const noTasksMessage = document.createElement('p');
+            noTasksMessage.textContent = 'No actionable tasks found in the transcript.';
+            noTasksMessage.style.textAlign = 'center';
+            noTasksMessage.style.marginTop = '20px';
+            meetingTasksColumn.appendChild(noTasksMessage);
+        }
+
+        initializeDraggableEmployees();
+        initializeDropZones();
+    }
+
+    nextStepButtons.forEach(button => {
+        button.addEventListener('click', async () => {
+            const targetStep = parseInt(button.dataset.targetStep);
+            if (targetStep) {
+                if (currentStep === 1) {
+                    if (uploadedFile) {
+                        if (window.uploadedTasks && window.availableEmployees) {
+                            renderStep2Content(window.uploadedTasks, window.availableEmployees);
+                            updateStepUI(targetStep);
+                        } else {
+                            alert('Processing is still ongoing, please wait or re-upload.');
+                        }
+                    } else {
+                        alert('Please upload a file before proceeding to the next step.');
+                    }
+                } else if (currentStep === 2) {
+                    const assignments = {};
+                    document.querySelectorAll('.meeting-task .drop-zone').forEach(zone => {
+                        const taskId = zone.dataset.taskId;
+                        const assignedEmployee = zone.querySelector('.employee-item');
+                        if (taskId && assignedEmployee) {
+                            assignments[taskId] = assignedEmployee.dataset.id;
+                        }
+                    });
+                    console.log('Collected Assignments:', assignments);
+                    updateStepUI(targetStep);
+                }
+                else {
+                    updateStepUI(targetStep);
+                }
+            }
+        });
+    });
 
     function updateFileInputAccept() {
         const selectedType = getSelectedFileType();
@@ -86,6 +176,115 @@ document.addEventListener('DOMContentLoaded', () => {
         currentStep = stepNumber;
     }
 
+    async function fetchEmployees() {
+        try {
+            const response = await fetch('/employees');
+            if (!response.ok) {
+                throw new Error('Failed to fetch employees');
+            }
+            const employees = await response.json();
+            return employees;
+        } catch (error) {
+            console.error('Error fetching employees:', error);
+            return [];
+        }
+    }
+
+    function initializeDraggableEmployees() {
+        document.querySelectorAll('.employee-item').forEach(item => { 
+            item.removeEventListener('dragstart', handleDragStart); 
+            item.removeEventListener('dragend', handleDragEnd);
+            item.addEventListener('dragstart', handleDragStart);
+            item.addEventListener('dragend', handleDragEnd);
+        });
+    }
+
+    function handleDragStart(e) {
+        draggedEmployee = e.target;
+        e.dataTransfer.setData('text/plain', e.target.dataset.id);
+        e.dataTransfer.effectAllowed = 'move';
+        setTimeout(() => {
+            if (draggedEmployee) {
+                draggedEmployee.classList.add('hidden');
+            }
+        }, 0);
+    }
+
+    function handleDragEnd(e) {
+        if (draggedEmployee && draggedEmployee.classList.contains('hidden')) {
+            draggedEmployee.classList.remove('hidden');
+        }
+        draggedEmployee = null;
+    }
+
+    function initializeDropZones() {
+        const dropZones = document.querySelectorAll('.drop-zone');
+        dropZones.forEach(zone => {
+            zone.removeEventListener('dragover', handleDragOver); 
+            zone.removeEventListener('dragleave', handleDragLeave);
+            zone.removeEventListener('drop', handleDrop);
+
+            zone.addEventListener('dragover', handleDragOver);
+            zone.addEventListener('dragleave', handleDragLeave);
+            zone.addEventListener('drop', handleDrop);
+
+            togglePlaceholder(zone, zone.children.length === 0 || (zone.children.length === 1 && zone.querySelector('.drop-placeholder')));
+        });
+        togglePlaceholder(availableEmployeesList, false);
+    }
+
+    function handleDragOver(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        e.currentTarget.classList.add('drag-over-zone');
+        togglePlaceholder(e.currentTarget, false);
+    }
+
+    function handleDragLeave(e) {
+        e.currentTarget.classList.remove('drag-over-zone');
+        togglePlaceholder(e.currentTarget, e.currentTarget.children.length === 0 || (e.currentTarget.children.length === 1 && e.currentTarget.querySelector('.drop-placeholder')));
+    }
+
+    function handleDrop(e) {
+        e.preventDefault();
+        const currentDropZone = e.currentTarget;
+        currentDropZone.classList.remove('drag-over-zone');
+
+        const employeeId = e.dataTransfer.getData('text/plain');
+        const employeeItem = document.querySelector(`.employee-item[data-id="${employeeId}"]`);
+
+        if (employeeItem && employeeItem !== currentDropZone) { 
+            const originalParentZone = employeeItem.parentNode;
+
+            if (currentDropZone.dataset.taskId) {
+                const existingItemInZone = currentDropZone.querySelector('.employee-item');
+                if (existingItemInZone) {
+                    availableEmployeesList.appendChild(existingItemInZone);
+                    togglePlaceholder(availableEmployeesList, false); 
+                    existingItemInZone.classList.remove('hidden');
+                }
+            }
+
+            const currentPlaceholder = currentDropZone.querySelector('.drop-placeholder');
+            if (currentPlaceholder) {
+                currentPlaceholder.remove();
+            }
+
+            currentDropZone.appendChild(employeeItem);
+            employeeItem.classList.remove('hidden');
+
+            togglePlaceholder(originalParentZone, originalParentZone.children.length === 0 || (originalParentZone.children.length === 1 && originalParentZone.querySelector('.drop-placeholder')));
+            togglePlaceholder(currentDropZone, false);
+        } else if (employeeItem) {
+            employeeItem.classList.remove('hidden');
+        }
+
+        document.querySelectorAll('.drop-zone').forEach(zone => {
+            togglePlaceholder(zone, zone.children.length === 0 || (zone.children.length === 1 && zone.querySelector('.drop-placeholder')));
+        });
+        togglePlaceholder(availableEmployeesList, false);
+    }
+
     async function handleFileUpload(file) {
         if (!file) return;
 
@@ -117,18 +316,30 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('fileType', selectedType);
 
         try {
-            const simulatedData = { filename: file.name, size: file.size };
+            const response = await fetch('/', {
+                method: 'POST',
+                body: formData
+            });
 
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'File upload failed');
+            }
+
+            const data = await response.json();
+            console.log('Backend Response:', data);
 
             uploadedFile = file;
-            fileInfoParagraph.textContent = `Uploaded: ${simulatedData.filename}`;
+            fileInfoParagraph.textContent = `Uploaded: ${data.filename}`;
             uploadStatusParagraph.textContent = 'Upload successful!';
             progressBarFill.style.width = '100%';
             progressBarFill.style.backgroundColor = 'var(--success-green)';
             if (step1NextButton) {
                 step1NextButton.disabled = false;
             }
+
+            window.uploadedTasks = data.tasks;
+            window.availableEmployees = await fetchEmployees();
 
         } catch (error) {
             console.error('Upload Error:', error);
@@ -154,9 +365,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    browseFilesSpan.addEventListener('click', () => {
-        fileInput.click();
-    });
+    if (browseFilesSpan) {
+        browseFilesSpan.addEventListener('click', () => {
+            fileInput.click();
+        });
+    }
+
 
     uploadArea.addEventListener('dragover', (e) => {
         e.preventDefault();
@@ -175,23 +389,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    nextStepButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const targetStep = parseInt(button.dataset.targetStep);
-            if (targetStep) {
-                if (currentStep === 1) {
-                    if (uploadedFile) {
-                        updateStepUI(targetStep);
-                    } else {
-                        alert('Please upload a file before proceeding to the next step.');
-                    }
-                } else {
-                    updateStepUI(targetStep);
-                }
-            }
-        });
-    });
-
     const dashboardButton = document.querySelector('.dashboard-btn');
     if (dashboardButton) {
         dashboardButton.addEventListener('click', () => {
@@ -201,11 +398,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateStepUI(currentStep);
     updateFileInputAccept();
-
-    const availableEmployeesList = document.getElementById('availableEmployees');
-    const dropZones = document.querySelectorAll('.drop-zone');
-
-    let draggedEmployee = null;
 
     function togglePlaceholder(zoneElement, show, text = 'Drag employee here') {
         let placeholder = zoneElement.querySelector('.drop-placeholder');
@@ -218,115 +410,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (show) {
-            if (zoneElement.children.length === 0 && !placeholder) {
-                placeholder = document.createElement('p');
-                placeholder.className = 'drop-placeholder';
-                placeholder.textContent = text;
-                zoneElement.appendChild(placeholder);
+            if (zoneElement.children.length === 0 || (zoneElement.children.length === 1 && placeholder)) {
+                if (!placeholder) {
+                    placeholder = document.createElement('p');
+                    placeholder.className = 'drop-placeholder';
+                    placeholder.textContent = text;
+                    zoneElement.appendChild(placeholder);
+                }
             }
         } else {
             if (placeholder && zoneElement.querySelector('.employee-item')) {
                 placeholder.remove();
-            }
-        }
-
-        if (zoneElement !== availableEmployeesList && zoneElement.children.length === 0) {
-            if (!zoneElement.querySelector('.drop-placeholder')) {
-                const newPlaceholder = document.createElement('p');
-                newPlaceholder.className = 'drop-placeholder';
-                newPlaceholder.textContent = text;
-                zoneElement.appendChild(newPlaceholder);
+            } else if (placeholder && !show) {
+                placeholder.remove();
             }
         }
     }
-
-    document.addEventListener('dragstart', (e) => {
-        if (e.target.classList.contains('employee-item')) {
-            draggedEmployee = e.target;
-            e.dataTransfer.setData('text/plain', e.target.dataset.id); 
-            setTimeout(() => {
-                e.target.classList.add('hidden');
-            }, 0);
-        }
-    });
-
-    document.addEventListener('dragend', (e) => {
-        if (draggedEmployee) {
-            if (draggedEmployee.classList.contains('hidden')) {
-                draggedEmployee.classList.remove('hidden');
-            }
-            draggedEmployee = null;
-        }
-    });
-
-    // Event listeners for each drop zone
-    dropZones.forEach(zone => {
-        zone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'move';
-            zone.classList.add('drag-over-zone');
-            togglePlaceholder(zone, false);
-        });
-
-        zone.addEventListener('dragleave', () => {
-            zone.classList.remove('drag-over-zone');
-            togglePlaceholder(zone, true);
-        });
-
-        zone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            zone.classList.remove('drag-over-zone');
-
-            const employeeId = e.dataTransfer.getData('text/plain');
-            const employeeItem = document.querySelector(`.employee-item[data-id="${employeeId}"]`);
-
-            if (employeeItem && employeeItem.parentNode !== zone) {
-                const originalParentZone = employeeItem.parentNode;
-
-                if (zone.children.length > 0 && zone !== availableEmployeesList) {
-                    const existingItemInZone = zone.querySelector('.employee-item');
-                    if (existingItemInZone) {
-                        availableEmployeesList.appendChild(existingItemInZone);
-                        togglePlaceholder(zone, true);
-                    }
-                }
-
-                zone.appendChild(employeeItem);
-                employeeItem.classList.remove('hidden'); 
-
-                togglePlaceholder(zone, false); 
-                togglePlaceholder(originalParentZone, true); 
-            } else if (employeeItem && employeeItem.parentNode === zone) {
-                employeeItem.classList.remove('hidden');
-            }
-
-            dropZones.forEach(dz => togglePlaceholder(dz, dz.children.length === 0));
-        });
-    });
-
-    togglePlaceholder(availableEmployeesList, false);
-
-    document.querySelectorAll('.meeting-tasks-column .drop-zone').forEach(zone => {
-        togglePlaceholder(zone, zone.children.length === 0);
-    });
-
-    availableEmployeesList.querySelectorAll('.employee-item').forEach(item => {
-        item.addEventListener('dragstart', (e) => {
-            draggedEmployee = e.target;
-            e.dataTransfer.setData('text/plain', e.target.dataset.id);
-            e.dataTransfer.effectAllowed = 'move';
-            setTimeout(() => {
-                e.target.classList.add('hidden');
-            }, 0);
-        });
-        item.addEventListener('dragend', (e) => {
-            if (draggedEmployee) {
-                if (draggedEmployee.classList.contains('hidden')) {
-                    draggedEmployee.classList.remove('hidden');
-                }
-                draggedEmployee = null;
-            }
-        });
-    });
-
-});
+}); 
