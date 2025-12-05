@@ -5,9 +5,9 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/github/last-commit/hannahjan06/MULTIBRAIN" alt="last commit">
-  <img src="https://img.shields.io/github/languages/top/hannahjan06/MULTIBRAIN?color=2b7489&label=top%20language" alt="top language">
-  <img src="https://img.shields.io/github/languages/count/hannahjan06/MULTIBRAIN?label=languages" alt="languages">
+  <img src="https://img.shields.io/github/last-commit/hannahjan06/MultiBrain-AI" alt="last commit">
+  <img src="https://img.shields.io/github/languages/top/hannahjan06/MultiBrain-AI?color=2b7489&label=top%20language" alt="top language">
+  <img src="https://img.shields.io/github/languages/count/hannahjan06/MultiBrain-AI?label=languages" alt="languages">
 </p>
 
 <p align="center">
@@ -264,7 +264,8 @@ http://127.0.0.1:5000/
 
 ---
 
-Built for people who hate manual notes, forgotten tasks, and “what did we decide in that meeting??” energy.
+## Credits
 
-```
-```
+Built with way too much coffee, Python, and curiosity.
+AI stack: **Whisper + Ollama (LLaMA 2)**
+Backend: **Flask + SQLite + SQLAlchemy**
