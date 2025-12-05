@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Events Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="static/events.css"> <!-- This links to your CSS -->
+    <link rel="stylesheet" href="static/events.css">
 </head>
 <body>
     <div class="dashboard-container">
@@ -19,7 +19,7 @@
                     <li class="active"><a href="/events"><i class="fas fa-calendar-check"></i> Events</a></li>
                     <li><a href="/auto_assign"><i class="fas fa-file-alt"></i> Transcribe</a></li>
                     <li><a href="/employees_page"><i class="fas fa-users"></i> Employees</a></li>
-                    <li><a href="#"><i class="fas fa-user-circle"></i> Tasks</a></li>
+                    <li><a href="/tasks_page"><i class="fas fa-user-circle"></i> Tasks</a></li>
                 </ul>
             </nav>
         </aside>
@@ -41,7 +41,6 @@
                     <div class="nearest-events-column dashboard-card">
                         <h3>Nearest Events</h3>
                         <div class="event-list" id="nearest-events-list">
-                            <!-- Nearest events will be loaded here -->
                         </div>
                     </div>
                     <div class="calendar-column dashboard-card">
@@ -52,7 +51,6 @@
                             <i class="fas fa-chevron-right calendar-nav" id="nextMonth"></i>
                         </div>
                         <div class="calendar-grid" id="calendar-grid">
-                            <!-- Calendar days and events will be loaded here -->
                         </div>
                     </div>
                 </div>
@@ -60,7 +58,6 @@
         </main>
     </div>
 
-    <!-- Event Detail Popup -->
     <div id="event-detail-popup" class="popup-overlay">
         <div class="popup-content">
             <button class="close-popup-btn">&times;</button>
@@ -76,10 +73,8 @@
         </div>
     </div>
 
-    <!-- Add Event Popup -->
     <div id="add-event-popup" class="popup-overlay">
         <div class="popup-content">
-            <!-- Modified close button for add event popup -->
             <button class="close-popup-btn-round" id="close-add-event-popup-btn-round"><i class="fas fa-times"></i></button>
             <h3>Add New Event</h3>
             <form id="add-event-form">
@@ -90,12 +85,12 @@
                 <div class="form-group">
                     <label for="newEventDate">Date:</label>
                     <input type="date" id="newEventDate" required>
-                    <i class="fas fa-calendar-alt input-icon"></i> <!-- Added calendar icon -->
+                    <i class="fas fa-calendar-alt input-icon"></i>
                 </div>
                 <div class="form-group">
                     <label for="newEventTime">Time:</label>
                     <input type="time" id="newEventTime" required>
-                    <i class="fas fa-clock input-icon"></i> <!-- Added clock icon -->
+                    <i class="fas fa-clock input-icon"></i>
                 </div>
                 <div class="form-group">
                     <label for="newEventCategory">Category:</label>
@@ -104,7 +99,6 @@
                         <option value="work">Work</option>
                         <option value="social">Social</option>
                         <option value="meeting">Meeting</option>
-                        <!-- Add more categories as needed -->
                     </select>
                 </div>
                 <div class="form-group">
@@ -119,6 +113,6 @@
         </div>
     </div>
 
-    <script src="static/events.js"></script> <!-- This links to your JavaScript -->
+    <script src="static/events.js"></script>
 </body>
 </html>

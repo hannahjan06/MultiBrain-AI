@@ -19,7 +19,7 @@
                     <li class="/events"><a href="/events"><i class="fas fa-calendar-check"></i> Events</a></li>
                     <li><a href="/auto_assign"><i class="fas fa-file-alt"></i> Transcribe</a></li>
                     <li class="active"><a href="/employees_page"><i class="fas fa-users"></i> Employees</a></li>
-                    <li><a href="#"><i class="fas fa-user-circle"></i> Tasks</a></li>
+                    <li><a href="/tasks_page"><i class="fas fa-user-circle"></i> Tasks</a></li>
                 </ul>
             </nav>
         </aside>
@@ -43,10 +43,8 @@
             </header>
 
             <section class="employee-grid" id="employee-grid">
-                <!-- Employee cards will be dynamically inserted here -->
             </section>
 
-            <!-- Add Employee Modal (Existing) -->
             <div id="addEmployeeModal" class="modal">
                 <div class="modal-content">
                     <span class="close-button">&times;</span>
@@ -73,13 +71,11 @@
                 </div>
             </div>
 
-            <!-- NEW: Employee Details Modal -->
             <div id="employeeDetailsModal" class="modal">
                 <div class="modal-content">
                     <span class="close-button">&times;</span>
                     <div class="employee-info">
                         <div id="details-avatar" class="avatar-large">
-                            <!-- Avatar will be dynamically inserted here -->
                             <i class="fas fa-user-circle avatar-large"></i>
                         </div>
                         <h2 id="details-name" class="name">Employee Name</h2>
@@ -102,7 +98,6 @@
                     <div class="tasks-list-section">
                         <h3>Assigned Tasks</h3>
                         <ul id="employee-tasks-list" class="tasks-list">
-                            <!-- Tasks will be dynamically inserted here -->
                             <li class="no-tasks">No tasks assigned yet.</li>
                         </ul>
                     </div>
@@ -113,6 +108,6 @@
     </div>
 
     <script src="static/employee.js"></script>
-    <script src="static/dash.js"></script> <!-- Keep dash.js for sidebar active state if desired -->
+    <script src="static/dash.js"></script>
 </body>
 </html>

@@ -6,7 +6,7 @@
     <title>Tasks Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="static/dash.css">
-    <link rel="stylesheet" href="static/tasks.css"> 
+    <link rel="stylesheet" href="static/tasks.css">
 </head>
 <body>
     <div class="dashboard-container">
@@ -26,20 +26,6 @@
         </aside>
 
         <main class="main-content">
-            <div class="header-top">
-                <div class="search-bar">
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="text" placeholder="Search tasks...">
-                </div>
-                <div class="header-actions">
-                    <i class="fas fa-bell notification-icon"></i>
-                    <div class="user-profile">
-                        <img src="https://i.pravatar.cc/150?img=68" alt="User Avatar" class="user-avatar">
-                        <span>Evan</span>
-                    </div>
-                </div>
-            </div>
-
             <div class="tasks-overview-section">
                 <div class="section-header">
                     <h2>All Tasks (<span id="task-count">0</span>)</h2>
@@ -53,22 +39,33 @@
                     </div>
                 </div>
 
-                <div class="tasks-list-container">
-                    <div class="tasks-filter-sort">
-                        <select id="status-filter">
-                            <option value="all">All Statuses</option>
-                            <option value="pending">Pending</option>
-                            <option value="complete">Complete</option>
-                        </select>
-                        <select id="employee-filter">
-                            <option value="all">All Employees</option>
-                            <!-- Employee options will be loaded dynamically -->
-                        </select>
-                        <input type="text" id="deadline-filter" placeholder="Filter by deadline (YYYY-MM-DD)">
-                        <button id="clear-filters-btn" class="control-btn">Clear Filters</button>
+                <section class="tasks-filters-section card">
+                    <h2>Filter Tasks</h2>
+                    <div class="filters-container">
+                        <div class="filter-group">
+                            <label for="status-filter">Status:</label>
+                            <select id="status-filter" class="form-select">
+                                <option value="all">All</option>
+                                <option value="pending">Pending</option>
+                                <option value="complete">Complete</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="employee-filter">Employee:</label>
+                            <select id="employee-filter" class="form-select">
+                                <option value="all">All Employees</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label for="deadline-filter">Deadline:</label>
+                            <input type="date" id="deadline-filter" class="form-input">
+                        </div>
+                        <button id="clear-filters-btn" class="btn btn-clear-filters"><i class="fas fa-times"></i> Clear Filters</button>
                     </div>
+                </section>
+
+                <div class="tasks-list-container">
                     <div class="task-grid" id="tasks-grid">
-                        <!-- Task cards will be dynamically inserted here -->
                         <div class="no-tasks-message" style="display: none;">
                             <i class="fas fa-clipboard-list"></i>
                             <p>No tasks found matching your criteria.</p>
@@ -79,7 +76,6 @@
         </main>
     </div>
 
-    <!-- Add New Task Modal -->
     <div id="addNewTaskModal" class="modal">
         <div class="modal-content">
             <span class="close-button">&times;</span>
@@ -97,7 +93,6 @@
                     <label for="taskAssignee">Assign to Employee (Optional)</label>
                     <select id="taskAssignee">
                         <option value="">Unassigned</option>
-                        <!-- Employees will be loaded here -->
                     </select>
                 </div>
                 <button type="submit" class="submit-task-btn">Add Task</button>

@@ -40,7 +40,6 @@ body {
     min-height: 100vh;
 }
 
-/* Sidebar Styling - No change */
 .sidebar {
     width: 250px;
     background-color: var(--sidebar-bg);
@@ -152,7 +151,6 @@ body {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
-/* Main Content Styling - No change */
 .main-content {
     flex-grow: 1;
     padding: 30px;
@@ -161,7 +159,6 @@ body {
     flex-direction: column;
 }
 
-/* Header Top Section (Search and User) - No change */
 .header-top {
     display: flex;
     justify-content: space-between;
@@ -234,7 +231,6 @@ body {
     color: var(--dark-text);
 }
 
-/* Welcome Message - No change */
 .welcome-message {
     margin-bottom: 30px;
 }
@@ -251,12 +247,11 @@ body {
     color: var(--medium-text);
 }
 
-/* NEW: Top Sections Grid (Workload & Events) */
 .top-sections-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr; /* Two equal columns */
+    grid-template-columns: 1fr 1fr;
     gap: 30px;
-    margin-bottom: 30px; /* Space between top sections and tasks below */
+    margin-bottom: 30px;
 }
 
 .dashboard-card {
@@ -293,11 +288,6 @@ body {
 
 .view-all-link:hover {
     text-decoration: underline;
-}
-
-/* Workload Section (Top Employees) - No major layout change needed, just removal of grid-column */
-.workload-section {
-    /* Removed grid-column: 1; as it's now part of top-sections-grid */
 }
 
 .workload-list .employee-item {
@@ -341,10 +331,6 @@ body {
     color: var(--primary-blue);
 }
 
-/* Nearest Events Section - No major layout change needed, just removal of grid-column */
-.nearest-events-section {
-    /* Removed grid-column: 3; as it's now part of top-sections-grid */
-}
 
 .nearest-events-section .event-list .event-item {
     display: flex;
@@ -395,16 +381,6 @@ body {
 .nearest-events-section .event-tag.green {
     background-color: var(--tag-green);
     color: var(--tag-green-text);
-}
-
-/* Tasks Section - Now full width */
-.tasks-section {
-    /* Removed grid-column: 2; and flex-grow: 1; as it's now naturally below and full width */
-}
-
-/* NEW: Styles for the tasks section to be full width */
-.full-width-task-section {
-    width: 100%; /* Ensure it spans the full width available in main-content */
 }
 
 .task-list {

@@ -2,29 +2,27 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     const topEmployeesGrid = document.getElementById('top-employees-grid');
-    const nearestEventsList = document.querySelector('.nearest-events-section .event-list'); // Get the event list container
+    const nearestEventsList = document.querySelector('.nearest-events-section .event-list');
     const autoAssignBtn = document.getElementById('autoAssignBtn');
     const sidebarLinks = document.querySelectorAll('.sidebar .main-nav ul li a');
     const assignedTasksList = document.getElementById('assigned-tasks-list');
     const viewAllWorkloadLink = document.getElementById('view-all-workload-link');
-    const viewAllEventsLink = document.querySelector('.nearest-events-section .view-all-link'); // Get the 'View All' link for events
+    const viewAllEventsLink = document.querySelector('.nearest-events-section .view-all-link');
 
-    // Function to fetch and render Workload (Top Employees) from backend
     async function fetchAndRenderWorkload() {
         if (!topEmployeesGrid) return;
 
         try {
-            const response = await fetch('/employees'); // Fetch from your backend /employees endpoint
+            const response = await fetch('/employees');
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const employees = await response.json();
 
-            // Sort employees by total_pending_tasks (highest first) for workload
             const sortedEmployees = employees.sort((a, b) => b.total_pending_tasks - a.total_pending_tasks);
 
-            topEmployeesGrid.innerHTML = ''; // Clear existing cards
-            sortedEmployees.slice(0, 5).forEach(employee => { // Display top 5 employees
+            topEmployeesGrid.innerHTML = '';
+            sortedEmployees.slice(0, 5).forEach(employee => {
                 const employeeItem = document.createElement('div');
                 employeeItem.classList.add('employee-item');
 
@@ -37,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p class="employee-position">${employee.position}</p>
                     </div>
                     <span class="completed-tasks">${employee.total_pending_tasks || 0} pending</span>
-                `; // Changed to 'pending'
+                `;
                 topEmployeesGrid.appendChild(employeeItem);
             });
 
@@ -51,20 +49,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // NEW: Function to fetch and render Nearest Events from backend
     async function fetchAndRenderEvents() {
         if (!nearestEventsList) return;
 
         try {
-            const response = await fetch('/api/events'); // Fetch from your backend /api/events endpoint
+            const response = await fetch('/api/events');
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const events = await response.json();
 
-            nearestEventsList.innerHTML = ''; // Clear existing events
+            nearestEventsList.innerHTML = ''; 
 
-            // Limit to a few nearest events, e.g., the first 3 or 4
             events.slice(0, 4).forEach(event => {
                 const eventItem = document.createElement('div');
                 eventItem.classList.add('event-item');
@@ -77,7 +73,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else if (event.category === 'meeting') {
                     tagClass = 'green';
                 }
-                // You can add more categories and colors here
 
                 eventItem.innerHTML = `
                     <div class="event-details">
@@ -99,40 +94,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // New: Function to fetch and render Tasks from backend
-    // ... (This function remains largely the same, but ensure it fetches *pending* tasks for the dashboard) ...
     async function fetchAndRenderTasks() {
         if (!assignedTasksList) return;
 
         try {
-            const response = await fetch('/assignments'); // Fetch from your backend /assignments endpoint
+            const response = await fetch('/assignments');
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const allTasks = await response.json();
 
-            assignedTasksList.innerHTML = ''; // Clear existing tasks
+            assignedTasksList.innerHTML = '';
 
             const pendingTasks = allTasks.filter(t => t.status === 'pending');
 
-            // Display a limited number of pending tasks, e.g., the first 7
             pendingTasks.slice(0, 7).forEach(task => {
                 const taskItem = document.createElement('div');
                 taskItem.classList.add('task-item');
 
                 let priorityClass = 'priority-low';
-                // Example: If a task has a deadline within the next 7 days, consider it medium priority.
-                // This would require parsing the deadline into a Date object for accurate comparison.
-                // For simplicity, let's just use a basic logic or assume backend provides a priority.
                 if (task.deadline) {
                     const today = new Date();
-                    const deadlineDate = new Date(task.deadline); // Assuming deadline is in YYYY-MM-DD format
+                    const deadlineDate = new Date(task.deadline);
                     const diffTime = deadlineDate.getTime() - today.getTime();
                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-                    if (diffDays <= 3) { // Deadline in 3 days or less
+                    if (diffDays <= 3) {
                         priorityClass = 'priority-high';
-                    } else if (diffDays <= 7) { // Deadline in 7 days or less
+                    } else if (diffDays <= 7) {
                         priorityClass = 'priority-medium';
                     }
                 }
@@ -141,14 +130,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 let assigneeAvatar = '';
                 let assigneeName = 'Unassigned';
 
-                if (task.assignee_avatar) { // Use avatar provided by the backend /assignments endpoint
+                if (task.assignee_avatar) {
                     assigneeAvatar = task.assignee_avatar;
                     assigneeName = task.assignee_name;
                 } else if (task.ai_assignee) {
                     assigneeName = task.ai_assignee + ' (AI)';
-                    assigneeAvatar = `https://i.pravatar.cc/150?img=${(task.id % 70) + 20}`; // Fallback random for AI
+                    assigneeAvatar = `https://i.pravatar.cc/150?img=${(task.id % 70) + 20}`;
                 } else {
-                    assigneeAvatar = `https://i.pravatar.cc/150?img=70`; // Generic for truly unassigned
+                    assigneeAvatar = `https://i.pravatar.cc/150?img=70`;
                 }
 
                 taskItem.innerHTML = `
@@ -172,63 +161,51 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    fetchAndRenderWorkload();
+    fetchAndRenderEvents();
+    fetchAndRenderTasks();
 
-    // Initial render calls
-    fetchAndRenderWorkload(); // Call the async function to load real employee data
-    fetchAndRenderEvents();  // NEW: Call to load real event data
-    fetchAndRenderTasks(); // Call the async function to load real task data
-
-    // Add click listener for the Auto assign button
     if (autoAssignBtn) {
         autoAssignBtn.addEventListener('click', () => {
-            window.location.href = '/auto_assign'; // Redirect to the /auto_assign route
+            window.location.href = '/auto_assign';
         });
     }
 
-    // Now correctly targeting the "View All" link by its ID
     if (viewAllWorkloadLink) {
         viewAllWorkloadLink.addEventListener('click', (event) => {
-            event.preventDefault(); // Prevent default link behavior (#)
-            window.location.href = '/employees_page'; // Redirect to the /employees_page
+            event.preventDefault();
+            window.location.href = '/employees_page';
         });
     }
 
-    // NEW: Add click listener for "View All" events link
     if (viewAllEventsLink) {
         viewAllEventsLink.addEventListener('click', (event) => {
             event.preventDefault();
-            window.location.href = '/events'; // Redirect to the /events page
+            window.location.href = '/events';
         });
     }
 
-
-    // Add click listener for sidebar links
     sidebarLinks.forEach(link => {
         link.addEventListener('click', function(event) {
-            // Remove active from all
             sidebarLinks.forEach(item => item.parentElement.classList.remove('active'));
-            // Add active to clicked one
             this.parentElement.classList.add('active');
 
-            // Handle navigation
             const linkText = this.textContent.trim();
             if (linkText.includes('Dashboard')) {
                 window.location.href = '/';
-            } else if (linkText.includes('Events')) { // Add this condition for the new Events link
-                window.location.href = '/events'; // Redirect to the new events page (Python route)
+            } else if (linkText.includes('Events')) {
+                window.location.href = '/events';
             } else if (linkText.includes('Transcribe')) {
                 window.location.href = '/auto_assign';
             } else if (linkText.includes('Employees')) {
                 window.location.href = '/employees_page';
             }
             else {
-                // Prevent default for placeholder links, or add more specific routing
                 event.preventDefault();
                 console.log(`Clicked on: ${linkText}`);
             }
         });
 
-        // Set active class based on current URL path
         const currentPath = window.location.pathname;
         const linkText = link.textContent.trim();
 
@@ -236,7 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
             (currentPath === '/' && linkText.includes('Dashboard')) ||
             (currentPath === '/auto_assign' && linkText.includes('Transcribe')) ||
             (currentPath === '/employees_page' && linkText.includes('Employees')) ||
-            (currentPath === '/events' && linkText.includes('Events')) // Updated for '/events' route
+            (currentPath === '/events' && linkText.includes('Events'))
         ) {
             link.parentElement.classList.add('active');
         }

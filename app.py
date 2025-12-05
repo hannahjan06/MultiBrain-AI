@@ -1,6 +1,7 @@
 import smtplib
 import ssl
 from email.message import EmailMessage
+from collections import defaultdict
 import os
 from flask import Flask, jsonify, render_template, request, session
 from flask_sqlalchemy import SQLAlchemy
@@ -11,19 +12,16 @@ import whisper
 import warnings
 import dotenv
 dotenv.load_dotenv()
-
 warnings.filterwarnings("ignore", message="FP16 is not supported on CPU*")
 
 app = Flask(__name__)
+db = SQLAlchemy(app)
 
 app.config['SECRET_KEY'] = os.getenv('UNIQUE_KEY', 'default_secret_key')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///multibrain.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
 EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
 EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
-
-db = SQLAlchemy(app)
 
 OLLAMA_PROMPT_TEMPLATE = """
 You are given a meeting transcript:
@@ -52,56 +50,12 @@ Extract ONLY the actionable tasks and return them as valid JSON in this exact sh
 - Action items must be realistic based on professional meetings.
 - Ignore fictional or literary content.
 """
-
 whisper_model = whisper.load_model("base", device="cpu")
 
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
 ALLOWED_EXTENSIONS = {'mp3', 'wav', 'txt', 'pdf', 'docx'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-def send_email(to_address, subject, body):
-    msg = EmailMessage()
-    msg['From'] = EMAIL_ADDRESS
-    msg['To'] = to_address
-    msg['Subject'] = subject
-    msg.set_content(body)
-
-    stmp_server = "smtp.gmail.com"
-    port = 465
-
-    context = ssl.create_default_context()
-
-    with smtplib.SMTP_SSL(stmp_server, port, context=context) as server:
-        server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
-        server.send_message(msg)
-
-def analyse_transcipt(text):
-    prompt = OLLAMA_PROMPT_TEMPLATE.format(transcript=text)
-
-    response = requests.post(
-        "http://localhost:11434/api/generate",
-        json={
-            "model": "llama2:latest",
-            "prompt": prompt,
-            "stream": False  
-        },
-        timeout = 120
-    )
-
-    response.raise_for_status()
-    raw = response.json()
-
-    print("Completed response")
-
-    model_text = raw.get("response", "")
-    try:
-        parsed = json.loads(model_text)
-    except json.JSONDecodeError:
-        raise ValueError("Model did not return valid JSON")
-
-    return parsed
 
 class Meeting(db.Model):
     __tablename__ = 'meetings'
@@ -149,6 +103,7 @@ class Employee(db.Model):
     role = db.Column(db.String(255))
     position = db.Column(db.String(120))
     email = db.Column(db.String(255))
+    avatar = db.Column(db.String(255), nullable=True)
 
     tasks = db.relationship('Task', backref='assigned_employee', lazy=True)
 
@@ -170,11 +125,65 @@ class Employee(db.Model):
             'role': self.role,
             'position': self.position,
             'email': self.email,
+            'avatar': self.avatar,
             'total_pending_tasks': pending,
             'total_completed_tasks': completed,
         }
-    
-from collections import defaultdict
+
+def send_email(to_address, subject, body):
+    msg = EmailMessage()
+    msg['From'] = EMAIL_ADDRESS
+    msg['To'] = to_address
+    msg['Subject'] = subject
+    msg.set_content(body)
+
+    stmp_server = "smtp.gmail.com"
+    port = 465
+
+    context = ssl.create_default_context()
+
+    with smtplib.SMTP_SSL(stmp_server, port, context=context) as server:
+        server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+        server.send_message(msg)
+
+def allowed_filename(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def transcribe_audio(file_path):
+    result = whisper_model.transcribe(file_path)
+    return result.get('text', '').strip()
+
+def is_audio_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'mp3', 'wav'}
+
+def is_text_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'txt', 'pdf', 'docx'}
+
+def analyse_transcipt(text):
+    prompt = OLLAMA_PROMPT_TEMPLATE.format(transcript=text)
+
+    response = requests.post(
+        "http://localhost:11434/api/generate",
+        json={
+            "model": "llama2:latest",
+            "prompt": prompt,
+            "stream": False  
+        },
+        timeout = 120
+    )
+
+    response.raise_for_status()
+    raw = response.json()
+
+    print("Completed response")
+
+    model_text = raw.get("response", "")
+    try:
+        parsed = json.loads(model_text)
+    except json.JSONDecodeError:
+        raise ValueError("Model did not return valid JSON")
+
+    return parsed
 
 def send_task_emails_for_meeting(meeting, tasks):
     employees = Employee.query.all()
@@ -216,19 +225,6 @@ def send_task_emails_for_meeting(meeting, tasks):
             subject="Meeting Task Reminder",
             body=body
         )
-
-def allowed_filename(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-def transcribe_audio(file_path):
-    result = whisper_model.transcribe(file_path)
-    return result.get('text', '').strip()
-
-def is_audio_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'mp3', 'wav'}
-
-def is_text_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'txt', 'pdf', 'docx'}
 
 @app.route('/', methods=['GET'])
 def dashboard():
@@ -311,6 +307,32 @@ def update_task_status(task_id):
         db.session.rollback()
         print(f"Error updating task status: {e}")
         return jsonify({'success': False, 'message': 'Failed to update task status in database'}), 500
+
+@app.route('/tasks', methods=['GET'])
+def get_all_tasks():
+    tasks = Task.query.all()
+    tasks_data = []
+    for task in tasks:
+        employee_name = None
+        if task.assigned_employee_id:
+            employee = Employee.query.get(task.assigned_employee_id)
+            if employee:
+                employee_name = employee.name
+
+        tasks_data.append({
+            'id': task.id,
+            'description': task.description,
+            'ai_assignee': task.ai_assignee,
+            'ai_assignee_confidence': task.ai_assignee_confidence,
+            'deadline': task.deadline,
+            'source_quotes': json.loads(task.source_quotes or '[]'),
+            'assigned_employee_id': task.assigned_employee_id,
+            'assigned_employee_name': employee_name,
+            'status': task.status,
+            'meeting_id': task.meeting_id,
+            'meeting_file_name': task.meeting.file_name if task.meeting else None
+        })
+    return jsonify(tasks_data), 200
 
 @app.route('/auto_assign', methods=['POST'])
 def upload_file():
@@ -448,6 +470,7 @@ def get_employees():
     employees = Employee.query.all()
     return jsonify([e.to_dict_with_stats() for e in employees]), 200
 
+
 @app.route('/employees', methods=['POST'])
 def employees():
     data = request.json
@@ -472,6 +495,24 @@ def employees():
 
     return jsonify(new_employee.to_dict_with_stats()), 201
 
+@app.route('/employees/<int:employee_id>/tasks', methods=['GET'])
+def get_employee_tasks(employee_id):
+    employee = Employee.query.get(employee_id)
+    if not employee:
+        return jsonify({'message': 'Employee not found'}), 404
+
+    tasks = []
+    for task in employee.tasks:
+        tasks.append({
+            'id': task.id,
+            'description': task.description,
+            'deadline': task.deadline,
+            'status': task.status,
+            'meeting_id': task.meeting_id,
+            'meeting_file_name': task.meeting.file_name if task.meeting else 'N/A'
+        })
+    return jsonify(tasks), 200
+
 @app.route('/assignments', methods=['GET'])
 def assignments():
     tasks = Task.query.all()
@@ -483,9 +524,6 @@ def assignments():
             employee = Employee.query.get(task.assigned_employee_id)
             if employee:
                 assignee_name = employee.name
-                # If Employee model had an avatar field:
-                # assignee_avatar = employee.avatar
-                # Otherwise, generate a predictable one based on ID for consistency
                 assignee_avatar = f"https://i.pravatar.cc/150?img={(employee.id % 70) + 1}"
         elif task.ai_assignee:
             assignee_name = task.ai_assignee + ' (AI Suggestion)'
@@ -604,72 +642,35 @@ def create_event():
         print(f"Error adding event: {e}")
         return jsonify({'success': False, 'message': 'Failed to add event to database'}), 500
 
-@app.route('/employees/<int:employee_id>/tasks', methods=['GET'])
-def get_employee_tasks(employee_id):
-    employee = Employee.query.get(employee_id)
-    if not employee:
-        return jsonify({'message': 'Employee not found'}), 404
-
-    tasks = []
-    for task in employee.tasks:
-        tasks.append({
-            'id': task.id,
-            'description': task.description,
-            'deadline': task.deadline,
-            'status': task.status,
-            'meeting_id': task.meeting_id,
-            'meeting_file_name': task.meeting.file_name if task.meeting else 'N/A'
-        })
-    return jsonify(tasks), 200
-
-if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
 
         if Employee.query.count() == 0:
             print("Adding dummy employees...")
-            employee1 = Employee(name="John Doe", role="UI/UX Designer", position="Designer",  email="john@example.com")
-            employee2 = Employee(name="Jane Smith", role="iOS Developer", position="Developer", email="jane@example.com")
-            employee3 = Employee(name="Peter Jones", role="Copywriter", position="Copywriter", email="peter@example.com")
-            employee4 = Employee(name="Alice Brown", role="Marketing", email="alice@example.com")
-            employee5 = Employee(name="Robert Green", role="Sales", email="robert@example.com")
+            employee1 = Employee(name="John Doe", role="UI/UX Designer", position="Designer",  email="john@example.com", avatar="https://i.pravatar.cc/150?img=1")
+            employee2 = Employee(name="Jane Smith", role="iOS Developer", position="Developer", email="jane@example.com", avatar="https://i.pravatar.cc/150?img=7")
+            employee3 = Employee(name="Peter Jones", role="Copywriter", position="Copywriter", email="peter@example.com", avatar="https://i.pravatar.cc/150?img=3")
+            employee4 = Employee(name="Alice Brown", role="Marketing", email="alice@example.com", avatar="https://i.pravatar.cc/150?img=4")
+            employee5 = Employee(name="Robert Green", role="Sales", email="robert@example.com", avatar="https://i.pravatar.cc/150?img=5")
             db.session.add_all([employee1, employee2, employee3, employee4, employee5])
             db.session.commit()
             print("Dummy employees added.")
 
-        # NEW: Add some dummy events if none exist
-        if Event.query.count() == 0:
-            print("Adding dummy events...")
-            event1 = Event(title="Presentation of the new department", date="Today", time="3:00 PM", category="work")
-            event2 = Event(title="Anna's Birthday", date="Today", time="6:00 PM", category="social")
-            event3 = Event(title="Ray's Meeting", date="Tomorrow", time="2:00 PM", category="meeting")
-            event4 = Event(title="Project Kick-off", date="25/03", time="10:00 AM", category="work")
-            event5 = Event(title="Team Lunch", date="26/03", time="1:00 PM", category="social")
-            db.session.add_all([event1, event2, event3, event4, event5])
-            db.session.commit()
-            print("Dummy events added.")
-
-        # NEW: Add some dummy tasks and assign them to employees for workload testing
         if Task.query.count() == 0:
             print("Adding dummy tasks for workload...")
             meeting1 = Meeting(file_name="Meeting_Alpha.mp3", transcript="Transcript for Alpha meeting.")
             meeting2 = Meeting(file_name="Meeting_Beta.mp3", transcript="Transcript for Beta meeting.")
             db.session.add_all([meeting1, meeting2])
-            db.session.flush() # Ensure meetings get IDs before assigning tasks
+            db.session.flush()
 
-            # Employee 1 (John Doe) tasks
             task1 = Task(meeting_id=meeting1.id, description="Design landing page mockups", ai_assignee="John Doe", deadline="2023-03-28", assigned_employee_id=1, status="pending")
             task2 = Task(meeting_id=meeting1.id, description="Review user flows", ai_assignee="John Doe", deadline="2023-03-29", assigned_employee_id=1, status="pending")
             task3 = Task(meeting_id=meeting2.id, description="Create design system components", ai_assignee="John Doe", deadline="2023-03-30", assigned_employee_id=1, status="complete")
 
-            # Employee 2 (Jane Smith) tasks
             task4 = Task(meeting_id=meeting1.id, description="Develop iOS login screen", ai_assignee="Jane Smith", deadline="2023-03-27", assigned_employee_id=2, status="pending")
             task5 = Task(meeting_id=meeting2.id, description="Implement push notifications", ai_assignee="Jane Smith", deadline="2023-04-01", assigned_employee_id=2, status="pending")
 
-            # Employee 3 (Peter Jones) tasks
             task6 = Task(meeting_id=meeting1.id, description="Write website copy", ai_assignee="Peter Jones", deadline="2023-03-28", assigned_employee_id=3, status="complete")
             task7 = Task(meeting_id=meeting2.id, description="Proofread marketing materials", ai_assignee="Peter Jones", deadline="2023-03-29", assigned_employee_id=3, status="pending")
             

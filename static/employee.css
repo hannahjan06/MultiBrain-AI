@@ -33,7 +33,6 @@ body {
     min-height: 100vh;
 }
 
-/* Sidebar Styling - Copied from dash.css, ensure consistency */
 .sidebar {
     width: 250px;
     background-color: var(--sidebar-bg);
@@ -83,7 +82,7 @@ body {
 }
 
 .sidebar-bottom {
-    margin-top: auto; /* Pushes content to the bottom */
+    margin-top: auto;
     padding: 20px;
     text-align: center;
 }
@@ -141,15 +140,12 @@ body {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
-
-/* Main Content Styling */
 .main-content {
     flex-grow: 1;
     padding: 30px;
     background-color: #fcfcfc;
 }
 
-/* Header Top Section (Search and User) */
 .header-top {
     display: flex;
     justify-content: space-between;
@@ -222,7 +218,6 @@ body {
     color: var(--dark-text);
 }
 
-/* Employee Header Section (Title and Controls) */
 .employee-header-section {
     display: flex;
     justify-content: space-between;
@@ -305,7 +300,6 @@ body {
     transform: translateY(-2px);
 }
 
-/* Employee Grid */
 .employee-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -334,11 +328,11 @@ body {
     object-fit: cover;
     margin: 0 auto 15px auto;
     border: 3px solid var(--primary-blue);
-    background-color: var(--light-blue); /* Fallback */
+    background-color: var(--light-blue);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2.5em; /* For icon avatars */
+    font-size: 2.5em;
     color: var(--primary-blue);
 }
 
@@ -371,10 +365,9 @@ body {
     margin: 0 5px;
 }
 
-/* MODIFIED: Employee Card Stats Grid */
 .employee-card .stats-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* Changed from 3 to 2 columns */
+    grid-template-columns: repeat(2, 1fr);
     gap: 15px;
     padding-top: 20px;
     border-top: 1px solid var(--employee-card-border);
@@ -382,7 +375,7 @@ body {
 }
 
 .employee-card .stat-item {
-    text-align: center; /* This already centers the text within each item */
+    text-align: center;
 }
 
 .employee-card .stat-value {
@@ -397,25 +390,23 @@ body {
     color: var(--light-text);
 }
 
-
-/* Modal Styles */
 .modal {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 1000; /* Sit on top */
+    display: none;
+    position: fixed;
+    z-index: 1000;
     left: 0;
     top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
     align-items: center;
     justify-content: center;
 }
 
 .modal-content {
     background-color: #fefefe;
-    margin: auto; /* Centered */
+    margin: auto;
     padding: 30px;
     border-radius: 15px;
     width: 90%;
@@ -426,7 +417,6 @@ body {
     animation-duration: 0.4s;
 }
 
-/* Add Animation */
 @keyframes animatetop {
     from {top: -300px; opacity: 0}
     to {top: 0; opacity: 1}

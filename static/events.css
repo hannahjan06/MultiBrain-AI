@@ -13,9 +13,9 @@
     --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     --header-bg: #fdfdfd;
     --employee-card-border: #f0f0f0;
-    --status-pending: #ffc107; /* Orange/Yellow for pending */
-    --status-complete: #28a745; /* Green for complete */
-    --status-late: #dc3545; /* Red for late (optional, could be implemented with deadline checks) */
+    --status-pending: #ffc107;
+    --status-complete: #28a745;
+    --status-late: #dc3545;
 }
 
 * {
@@ -36,7 +36,6 @@ body {
     min-height: 100vh;
 }
 
-/* Sidebar Styling - Copied from dash.css, ensure consistency */
 .sidebar {
     width: 250px;
     background-color: var(--sidebar-bg);
@@ -86,7 +85,7 @@ body {
 }
 
 .sidebar-bottom {
-    margin-top: auto; /* Pushes content to the bottom */
+    margin-top: auto;
     padding: 20px;
     text-align: center;
 }
@@ -144,15 +143,12 @@ body {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
-
-/* Main Content Styling */
 .main-content {
     flex-grow: 1;
     padding: 30px;
     background-color: #fcfcfc;
 }
 
-/* Header Top Section (Search and User) */
 .header-top {
     display: flex;
     justify-content: space-between;
@@ -225,7 +221,6 @@ body {
     color: var(--dark-text);
 }
 
-/* Employee Header Section (Title and Controls) */
 .employee-header-section {
     display: flex;
     justify-content: space-between;
@@ -308,7 +303,6 @@ body {
     transform: translateY(-2px);
 }
 
-/* Employee Grid */
 .employee-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -323,7 +317,7 @@ body {
     border: 1px solid var(--employee-card-border);
     text-align: center;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
-    cursor: pointer; /* Indicate it's clickable */
+    cursor: pointer;
 }
 
 .employee-card:hover {
@@ -338,11 +332,11 @@ body {
     object-fit: cover;
     margin: 0 auto 15px auto;
     border: 3px solid var(--primary-blue);
-    background-color: var(--light-blue); /* Fallback */
+    background-color: var(--light-blue);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2.5em; /* For icon avatars */
+    font-size: 2.5em;
     color: var(--primary-blue);
 }
 
@@ -375,10 +369,9 @@ body {
     margin: 0 5px;
 }
 
-/* MODIFIED: Employee Card Stats Grid */
 .employee-card .stats-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* Changed from 3 to 2 columns */
+    grid-template-columns: repeat(2, 1fr);
     gap: 15px;
     padding-top: 20px;
     border-top: 1px solid var(--employee-card-border);
@@ -386,7 +379,7 @@ body {
 }
 
 .employee-card .stat-item {
-    text-align: center; /* This already centers the text within each item */
+    text-align: center;
 }
 
 .employee-card .stat-value {
@@ -401,25 +394,23 @@ body {
     color: var(--light-text);
 }
 
-
-/* Modal Styles - Shared */
 .modal {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 1000; /* Sit on top */
+    display: none;
+    position: fixed;
+    z-index: 1000;
     left: 0;
     top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
     align-items: center;
     justify-content: center;
 }
 
 .modal-content {
     background-color: #fefefe;
-    margin: auto; /* Centered */
+    margin: auto;
     padding: 30px;
     border-radius: 15px;
     width: 90%;
@@ -430,7 +421,6 @@ body {
     animation-duration: 0.4s;
 }
 
-/* Add Animation */
 @keyframes animatetop {
     from {top: -300px; opacity: 0}
     to {top: 0; opacity: 1}
@@ -503,10 +493,8 @@ body {
     background-color: var(--sidebar-link-hover);
 }
 
-
-/* NEW: Employee Detail Modal Specific Styles */
 #employeeDetailsModal .modal-content {
-    max-width: 650px; /* Slightly wider for tasks */
+    max-width: 650px;
     text-align: left;
     padding: 35px;
 }
@@ -598,7 +586,7 @@ body {
 #employeeDetailsModal .tasks-list {
     list-style: none;
     padding: 0;
-    max-height: 300px; /* Limit height for scrollable tasks */
+    max-height: 300px;
     overflow-y: auto;
     margin-bottom: 20px;
 }
@@ -626,7 +614,7 @@ body {
     font-weight: 500;
     color: var(--dark-text);
     margin-bottom: 8px;
-    padding-right: 60px; /* Make space for status badge */
+    padding-right: 60px;
 }
 
 #employeeDetailsModal .task-meta {
@@ -675,7 +663,6 @@ body {
     min-height: 80px;
 }
 
-/* Scrollbar styling for tasks list */
 #employeeDetailsModal .tasks-list::-webkit-scrollbar {
     width: 8px;
 }
@@ -694,7 +681,6 @@ body {
     background: #555;
 }
 
-/* Specific styles for events.html (added/modified) */
 .events-overview-section {
     margin-top: 30px;
 }
@@ -739,7 +725,7 @@ body {
 
 .events-grid {
     display: grid;
-    grid-template-columns: 1fr 2fr; /* Nearest events take 1 part, calendar 2 parts */
+    grid-template-columns: 1fr 2fr;
     gap: 30px;
 }
 
@@ -760,9 +746,8 @@ body {
     border-bottom: 1px solid var(--border-color);
 }
 
-/* Nearest Events Column */
 .nearest-events-column .event-list {
-    max-height: 400px; /* Adjust as needed */
+    max-height: 400px;
     overflow-y: auto;
 }
 
@@ -810,7 +795,6 @@ body {
     margin-left: 10px;
 }
 
-/* Calendar Column */
 .calendar-column {
     display: flex;
     flex-direction: column;
@@ -856,7 +840,7 @@ body {
     padding: 10px 5px;
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    min-height: 80px; /* Ensure consistent height for days */
+    min-height: 80px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -866,7 +850,7 @@ body {
     color: var(--dark-text);
     background-color: #fff;
     transition: background-color 0.2s ease;
-    cursor: default; /* Default cursor for days without events */
+    cursor: default;
 }
 
 .calendar-grid .calendar-day:hover:not(.inactive) {
@@ -876,13 +860,13 @@ body {
 .calendar-grid .calendar-day.inactive {
     background-color: #f0f0f0;
     color: var(--light-text);
-    pointer-events: none; /* Disable interaction for inactive days */
+    pointer-events: none;
 }
 
 .calendar-grid .calendar-day .day-number {
     font-weight: 600;
     margin-bottom: 5px;
-    align-self: flex-end; /* Push number to top-right */
+    align-self: flex-end;
     padding: 2px 5px;
     border-radius: 5px;
 }
@@ -894,7 +878,7 @@ body {
 
 .calendar-grid .day-event {
     display: block;
-    width: calc(100% - 10px); /* Leave some padding */
+    width: calc(100% - 10px);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -913,18 +897,13 @@ body {
     filter: brightness(0.9);
 }
 
-/* Event Category Colors */
 .event-tag.work, .day-event.work { background-color: #AECBFA; color: #1976D2; }
 .event-tag.social, .day-event.social { background-color: #FFCDD2; color: #D32F2F; }
 .event-tag.meeting, .day-event.meeting { background-color: #C8E6C9; color: #388E3C; }
-/* Add more categories as needed */
-/* Default if no category match */
 .event-tag, .day-event { background-color: #E0E0E0; color: #757575; }
 
-
-/* Popup Overlays (Event Detail & Add Event) */
 .popup-overlay {
-    display: none; /* Hidden by default */
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
@@ -1006,7 +985,6 @@ body {
 .popup-content #popup-event-category.work { background-color: #1976D2; }
 .popup-content #popup-event-category.social { background-color: #D32F2F; }
 .popup-content #popup-event-category.meeting { background-color: #388E3C; }
-/* Default if no category match */
 .popup-content #popup-event-category { background-color: #757575; }
 
 
@@ -1055,7 +1033,6 @@ body {
     margin-right: 8px;
 }
 
-/* Add Event Popup Specific Styles */
 #add-event-popup .popup-content {
     max-width: 550px;
 }
@@ -1085,7 +1062,7 @@ body {
 }
 
 #add-event-form .form-group {
-    position: relative; /* For icon positioning */
+    position: relative;
 }
 
 #add-event-form .form-group input,
@@ -1098,7 +1075,7 @@ body {
     font-size: 1em;
     outline: none;
     transition: border-color 0.2s ease;
-    padding-right: 40px; /* Space for icon */
+    padding-right: 40px;
 }
 
 #add-event-form .form-group input:focus,
@@ -1119,12 +1096,12 @@ body {
     top: 50%;
     transform: translateY(-50%);
     color: var(--medium-text);
-    pointer-events: none; /* Allow clicks to pass through to input */
+    pointer-events: none;
 }
-#add-event-form .form-group:nth-child(2) .input-icon { /* Specific to date input */
-    top: calc(50% + 15px); /* Adjust icon position relative to label */
+#add-event-form .form-group:nth-child(2) .input-icon {
+    top: calc(50% + 15px);
 }
-#add-event-form .form-group:nth-child(3) .input-icon { /* Specific to time input */
+#add-event-form .form-group:nth-child(3) .input-icon {
     top: calc(50% + 15px);
 }
 
@@ -1170,7 +1147,6 @@ body {
     transform: translateY(-2px);
 }
 
-/* Scrollbar styling for nearest events list */
 .nearest-events-column .event-list::-webkit-scrollbar {
     width: 8px;
 }
@@ -1191,7 +1167,7 @@ body {
 
 @media (max-width: 992px) {
     .events-grid {
-        grid-template-columns: 1fr; /* Stack columns on smaller screens */
+        grid-template-columns: 1fr;
     }
 }
 
@@ -1217,11 +1193,11 @@ body {
     }
 
     .sidebar .main-nav {
-        display: none; /* Hide main nav on small screens, could replace with hamburger menu */
+        display: none;
     }
 
     .sidebar-bottom {
-        display: none; /* Hide bottom section on small screens */
+        display: none;
     }
 
     .main-content {

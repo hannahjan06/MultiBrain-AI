@@ -3,12 +3,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const employeeCountSpan = document.getElementById('employee-count');
     const addEmployeeBtn = document.getElementById('add-employee-btn');
     const addEmployeeModal = document.getElementById('addEmployeeModal');
-    const closeAddModalButton = addEmployeeModal.querySelector('.close-button'); // Specific close button for Add Employee
+    const closeAddModalButton = addEmployeeModal.querySelector('.close-button');
     const addEmployeeForm = document.getElementById('addEmployeeForm');
-
-    // NEW: Employee Details Modal Elements
     const employeeDetailsModal = document.getElementById('employeeDetailsModal');
-    const closeDetailsModalButton = employeeDetailsModal.querySelector('.close-button'); // Specific close button for Details
+    const closeDetailsModalButton = employeeDetailsModal.querySelector('.close-button');
     const detailsAvatar = document.getElementById('details-avatar');
     const detailsName = document.getElementById('details-name');
     const detailsRole = document.getElementById('details-role');
@@ -19,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const employeeTasksList = document.getElementById('employee-tasks-list');
 
 
-    let employees = []; // Initialize as empty, data will come from the backend
+    let employees = [];
 
     async function fetchEmployees() {
         try {
@@ -31,16 +29,15 @@ document.addEventListener('DOMContentLoaded', () => {
             renderEmployees();
         } catch (error) {
             console.error('Error fetching employees:', error);
-            // Optionally, display an error message to the user
         }
     }
 
     function renderEmployees() {
-        employeeGrid.innerHTML = ''; // Clear existing cards
+        employeeGrid.innerHTML = '';
         employees.forEach(employee => {
             const employeeCard = document.createElement('div');
             employeeCard.classList.add('employee-card');
-            employeeCard.dataset.employeeId = employee.id; // Store employee ID
+            employeeCard.dataset.employeeId = employee.id;
 
             const avatarContent = employee.avatar ? `<img src="${employee.avatar}" alt="${employee.name}" class="avatar">` : `<i class="fas fa-user-circle avatar"></i>`;
 
@@ -64,13 +61,11 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             employeeGrid.appendChild(employeeCard);
         });
-        employeeCountSpan.textContent = employees.length; // Update the count
+        employeeCountSpan.textContent = employees.length;
 
-        // Attach event listeners to newly rendered employee cards
         attachEmployeeCardClickListeners();
     }
 
-    // NEW: Function to attach click listeners to employee cards
     function attachEmployeeCardClickListeners() {
         document.querySelectorAll('.employee-card').forEach(card => {
             card.addEventListener('click', async (event) => {
@@ -82,7 +77,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // NEW: Function to show employee details modal
     async function showEmployeeDetails(employeeId) {
         const employee = employees.find(emp => emp.id == employeeId);
         if (!employee) {
@@ -90,19 +84,16 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Populate basic employee info
         detailsAvatar.innerHTML = employee.avatar ? `<img src="${employee.avatar}" alt="${employee.name}" class="avatar-large">` : `<i class="fas fa-user-circle avatar-large"></i>`;
         detailsName.textContent = employee.name;
         detailsRole.textContent = employee.role;
         detailsPosition.textContent = employee.position;
         detailsEmail.textContent = employee.email;
 
-        // Populate task stats
         totalPendingTasksSpan.textContent = employee.total_pending_tasks;
         totalCompletedTasksSpan.textContent = employee.total_completed_tasks;
 
-        // Fetch and populate tasks
-        employeeTasksList.innerHTML = '<li class="no-tasks"><i class="fas fa-spinner fa-spin"></i> Loading tasks...</li>'; // Loading state
+        employeeTasksList.innerHTML = '<li class="no-tasks"><i class="fas fa-spinner fa-spin"></i> Loading tasks...</li>';
         try {
             const response = await fetch(`/employees/${employeeId}/tasks`);
             if (!response.ok) {
@@ -115,12 +106,11 @@ document.addEventListener('DOMContentLoaded', () => {
             employeeTasksList.innerHTML = '<li class="no-tasks"><i class="fas fa-exclamation-circle"></i> Failed to load tasks.</li>';
         }
 
-        employeeDetailsModal.style.display = 'flex'; // Show the modal
+        employeeDetailsModal.style.display = 'flex';
     }
 
-    // NEW: Function to render tasks in the details modal
     function renderEmployeeTasks(tasks) {
-        employeeTasksList.innerHTML = ''; // Clear previous tasks
+        employeeTasksList.innerHTML = '';
 
         if (tasks.length === 0) {
             employeeTasksList.innerHTML = '<li class="no-tasks"><i class="fas fa-clipboard-list"></i> No tasks assigned yet.</li>';
@@ -133,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const deadlineIcon = task.deadline ? '<i class="far fa-calendar-alt"></i>' : '';
             const deadlineText = task.deadline ? `Due: ${task.deadline}` : 'No deadline';
             const meetingIcon = task.meeting_file_name ? '<i class="fas fa-handshake"></i>' : '';
-            const meetingText = task.meeting_file_name ? `From: ${task.meeting_file_name.split('.')[0]}` : ''; // Show name without extension
+            const meetingText = task.meeting_file_name ? `From: ${task.meeting_file_name.split('.')[0]}` : ''; 
 
             taskItem.innerHTML = `
                 <div class="task-description">${task.description}</div>
@@ -147,53 +137,44 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-
-    // Modal functionality for ADD EMPLOYEE modal
     addEmployeeBtn.addEventListener('click', () => {
-        addEmployeeModal.style.display = 'flex'; // Use flex to center
+        addEmployeeModal.style.display = 'flex';
     });
 
     closeAddModalButton.addEventListener('click', () => {
         addEmployeeModal.style.display = 'none';
-        addEmployeeForm.reset(); // Clear the form
+        addEmployeeForm.reset();
     });
 
-    // Close ADD EMPLOYEE modal if user clicks outside of it
     window.addEventListener('click', (event) => {
         if (event.target == addEmployeeModal) {
             addEmployeeModal.style.display = 'none';
-            addEmployeeForm.reset(); // Clear the form
+            addEmployeeForm.reset();
         }
     });
 
-    // NEW: Close EMPLOYEE DETAILS modal
     closeDetailsModalButton.addEventListener('click', () => {
         employeeDetailsModal.style.display = 'none';
     });
 
-    // NEW: Close EMPLOYEE DETAILS modal if user clicks outside of it
     window.addEventListener('click', (event) => {
         if (event.target == employeeDetailsModal) {
             employeeDetailsModal.style.display = 'none';
         }
     });
 
-
-    // Handle form submission to add a new employee
     addEmployeeForm.addEventListener('submit', async (event) => {
-        event.preventDefault(); // Prevent default form submission
+        event.preventDefault();
 
         const newEmployeeData = {
             name: document.getElementById('employeeName').value,
             role: document.getElementById('employeeRole').value,
             position: document.getElementById('employeePosition').value,
             email: document.getElementById('employeeEmail').value,
-            // Avatar will be handled by the backend or set to a default
-            // total_pending_tasks and total_completed_tasks will be initialized by the backend
         };
 
         try {
-            const response = await fetch('/employees', { // POST request to /employees
+            const response = await fetch('/employees', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -209,10 +190,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const addedEmployee = await response.json();
             console.log('New employee added:', addedEmployee);
 
-            await fetchEmployees(); // Re-fetch all employees to ensure the UI is up-to-date with the new data
+            await fetchEmployees();
 
-            addEmployeeModal.style.display = 'none'; // Close modal
-            addEmployeeForm.reset(); // Clear the form
+            addEmployeeModal.style.display = 'none';
+            addEmployeeForm.reset();
 
             alert('New employee added successfully!');
         } catch (error) {
@@ -221,6 +202,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Initial fetch and render of employees when the page loads
     fetchEmployees();
 });
