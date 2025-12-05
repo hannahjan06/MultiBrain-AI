@@ -1,3 +1,6 @@
+import smtplib
+import ssl
+from email.message import EmailMessage
 import os
 from flask import Flask, jsonify, render_template, request, session
 from flask_sqlalchemy import SQLAlchemy
@@ -16,6 +19,9 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = os.getenv('UNIQUE_KEY', 'default_secret_key')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///multibrain.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+EMAIL_ADDRESS = os.getenv("EMAIL_ADDRESS")
+EMAIL_PASSWORD = os.getenv("EMAIL_PASSWORD")
 
 db = SQLAlchemy(app)
 
@@ -54,6 +60,22 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 ALLOWED_EXTENSIONS = {'mp3', 'wav', 'txt', 'pdf', 'docx'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+def send_email(to_address, subject, body):
+    msg = EmailMessage()
+    msg['From'] = EMAIL_ADDRESS
+    msg['To'] = to_address
+    msg['Subject'] = subject
+    msg.set_content(body)
+
+    stmp_server = "smtp.gmail.com"
+    port = 465
+
+    context = ssl.create_default_context()
+
+    with smtplib.SMTP_SSL(stmp_server, port, context=context) as server:
+        server.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+        server.send_message(msg)
 
 def analyse_transcipt(text):
     prompt = OLLAMA_PROMPT_TEMPLATE.format(transcript=text)
@@ -132,6 +154,49 @@ class Employee(db.Model):
             'total_pending_tasks': pending,
             'total_completed_tasks': completed,
         }
+    
+from collections import defaultdict
+
+def send_task_emails_for_meeting(meeting, tasks):
+    employees = Employee.query.all()
+    employees_by_name = {e.name.lower(): e for e in employees}
+
+    tasks_by_employee = defaultdict(list)
+
+    for task in tasks:
+        if not task.ai_assignee:
+            continue
+
+        emp = employees_by_name.get(task.ai_assignee.lower())
+        if not emp or not emp.email:
+            continue
+
+        tasks_by_employee[emp].append(task)
+
+    for emp, emp_tasks in tasks_by_employee.items():
+        lines = [
+            f"Hi {emp.name},",
+            "",
+            "This is to remind you of the tasks assigned to you from the recent meeting:",
+            "",
+        ]
+        for t in emp_tasks:
+            lines.append(
+                f"- {t.description} (Deadline: {t.deadline or 'Not specified'})"
+            )
+        lines.append("")
+        lines.append("Please make sure to complete these on time.")
+        lines.append("")
+        lines.append("Best,")
+        lines.append("Your Meeting Assistant")
+
+        body = "\n".join(lines)
+
+        send_email(
+            to_address=emp.email,
+            subject="Meeting Task Reminder",
+            body=body
+        )
 
 def allowed_filename(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -157,6 +222,10 @@ def employees_page():
 @app.route('/auto_assign', methods=['GET'])
 def auto_assign():
     return render_template('index.html')
+
+@app.route('/events', methods=['GET'])
+def events():
+    return render_template('events.html')
 
 @app.route('/auto_assign', methods=['POST'])
 def upload_file():
@@ -273,6 +342,11 @@ def upload_file():
         for task in saved_tasks
     ]
 
+    try:
+        send_task_emails_for_meeting(meeting, saved_tasks)
+    except Exception as e:
+        print("Error sending task emails:", e)
+
     return jsonify({
         'success': True,
         'message': 'File uploaded successfully',
@@ -288,6 +362,65 @@ def upload_file():
 def get_employees():
     employees = Employee.query.all()
     return jsonify([e.to_dict_with_stats() for e in employees]), 200
+
+@app.route('/employees', methods=['POST'])
+def employees():
+    data = request.json
+    try:
+        if not data:
+            return jsonify({'success': False, 'message': 'No data provided'}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'message': 'Invalid JSON data'}), 400
+    
+    try:
+        name = data.get('name')
+        role = data.get('role')
+        position = data.get('position')
+        email = data.get('email')
+    except Exception as e:
+        return jsonify({'success': False, 'message': 'Missing required employee field'}), 400
+
+    new_employee = Employee(name=name, role=role, position=position, email=email)
+
+    db.session.add(new_employee)
+    db.session.commit()
+
+    return jsonify(new_employee.to_dict_with_stats()), 201
+
+@app.route('/assignments', methods=['GET'])
+def assignments():
+    tasks = Task.query.all()
+    assignments = []
+    for task in tasks:
+        assignee_name = None
+        assignee_avatar = None
+        if task.assigned_employee_id:
+            employee = Employee.query.get(task.assigned_employee_id)
+            if employee:
+                assignee_name = employee.name
+                # If Employee model had an avatar field:
+                # assignee_avatar = employee.avatar
+                # Otherwise, generate a predictable one based on ID for consistency
+                assignee_avatar = f"https://i.pravatar.cc/150?img={(employee.id % 70) + 1}"
+        elif task.ai_assignee:
+            assignee_name = task.ai_assignee + ' (AI Suggestion)'
+            assignee_avatar = f"https://i.pravatar.cc/150?img={(task.id % 70) + 20}"
+    
+        assignments.append({
+        'id': task.id,
+        'meeting_id': task.meeting_id,
+        'description': task.description,
+        'ai_assignee': task.ai_assignee,
+        'ai_assignee_confidence': task.ai_assignee_confidence,
+        'deadline': task.deadline,
+        'source_quotes': json.loads(task.source_quotes or '[]'),
+        'assigned_employee_id': task.assigned_employee_id,
+        'status': task.status,
+        'assignee_name': assignee_name,
+        'assignee_avatar': assignee_avatar
+    })
+    
+    return jsonify(assignments), 200
 
 @app.route('/assignments', methods=['POST'])
 def save_assignments():
@@ -360,9 +493,9 @@ if __name__ == '__main__':
 
         if Employee.query.count() == 0:
             print("Adding dummy employees...")
-            employee1 = Employee(name="John Doe", role="Manager", email="john@example.com")
-            employee2 = Employee(name="Jane Smith", role="Developer", email="jane@example.com")
-            employee3 = Employee(name="Peter Jones", role="Designer", email="peter@example.com")
+            employee1 = Employee(name="John Doe", role="UI/UX Designer", position="Designer",  email="john@example.com")
+            employee2 = Employee(name="Jane Smith", role="iOS Developer", position="Developer", email="jane@example.com")
+            employee3 = Employee(name="Peter Jones", role="Copywriter", position="Copywriter", email="peter@example.com")
             employee4 = Employee(name="Alice Brown", role="Marketing", email="alice@example.com")
             employee5 = Employee(name="Robert Green", role="Sales", email="robert@example.com")
             db.session.add_all([employee1, employee2, employee3, employee4, employee5])

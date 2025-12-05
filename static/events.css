@@ -1,0 +1,789 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --primary-blue: #5B6DFF;
+    --light-blue: #E0E7FF;
+    --dark-text: #333;
+    --medium-text: #666;
+    --light-text: #999;
+    --border-color: #eee;
+    --card-bg: #fff;
+    --sidebar-bg: #6a7eff;
+    --sidebar-link-hover: #5263d6;
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    --header-bg: #fdfdfd;
+    --tag-orange: #ffe0b2;
+    --tag-orange-text: #ff9800;
+    --tag-blue: #bbdefb;
+    --tag-blue-text: #2196F3;
+    --tag-green: #c8e6c9;
+    --tag-green-text: #4CAF50;
+    --activity-highlight: var(--primary-blue);
+    --activity-time-color: #aaa;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f4f7f6;
+    color: var(--dark-text);
+    line-height: 1.6;
+}
+
+.dashboard-container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* Sidebar Styling (specific to events.html) */
+.sidebar {
+    width: 250px;
+    background-color: var(--sidebar-bg);
+    color: #fff;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    left: 0;
+    height: 100vh; /* Ensure it takes full height */
+    flex-shrink: 0; /* ADDED: Prevents the sidebar from shrinking */
+}
+
+.sidebar .logo {
+    height: 60px;
+    background-color: rgba(255, 255, 255, 0.1);
+    margin: 0 20px 30px 20px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1.2em;
+}
+
+.sidebar .logo i {
+    margin-right: 10px;
+}
+
+.sidebar .main-nav ul {
+    list-style: none;
+}
+
+.sidebar .main-nav ul li a {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.0em;
+    transition: background-color 0.2s ease, padding-left 0.2s ease;
+}
+
+.sidebar .main-nav ul li a i {
+    margin-right: 15px;
+    font-size: 1.2em;
+}
+
+.sidebar .main-nav ul li.active a,
+.sidebar .main-nav ul li a:hover {
+    background-color: var(--sidebar-link-hover);
+    padding-left: 25px;
+    border-left: 4px solid #fff;
+}
+
+.sidebar-bottom {
+    margin-top: auto;
+    padding: 20px;
+    text-align: center;
+}
+
+.support-box {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.support-img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-bottom: 10px;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.support-btn {
+    background-color: #fff;
+    color: var(--primary-blue);
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 0.9em;
+    font-weight: 500;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.2s ease;
+}
+
+.support-btn:hover {
+    background-color: var(--light-blue);
+}
+
+.logout-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    text-decoration: none;
+    font-size: 1em;
+    padding: 10px;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+}
+
+.logout-link i {
+    margin-right: 10px;
+}
+
+.logout-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Main Content Styling */
+.main-content {
+    flex-grow: 1;
+    padding: 30px;
+    background-color: #fcfcfc;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden; /* ADDED: Prevent horizontal overflow issues */
+}
+
+/* Header Top Section (Search and User) */
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    background-color: var(--header-bg);
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.search-bar {
+    position: relative;
+    width: 400px;
+}
+
+.search-bar input {
+    width: 100%;
+    padding: 10px 15px 10px 40px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.95em;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.search-bar input:focus {
+    border-color: var(--primary-blue);
+}
+
+.search-bar .search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--light-text);
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+}
+
+.notification-icon {
+    font-size: 1.4em;
+    color: var(--medium-text);
+    margin-right: 25px;
+    cursor: pointer;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    background-color: var(--card-bg);
+    padding: 8px 15px;
+    border-radius: 20px;
+    box-shadow: var(--shadow);
+    cursor: pointer;
+}
+
+.user-profile .user-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 10px;
+    object-fit: cover;
+}
+
+.user-profile span {
+    font-weight: 500;
+    color: var(--dark-text);
+}
+
+/* Events Overview Section */
+.events-overview-section {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.section-header h2 {
+    font-size: 2em;
+    font-weight: 600;
+    color: var(--dark-text);
+}
+
+.add-event-btn {
+    background-color: var(--primary-blue);
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 0.95em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.2s ease;
+}
+
+.add-event-btn i {
+    margin-right: 8px;
+}
+
+.add-event-btn:hover {
+    background-color: var(--sidebar-link-hover);
+}
+
+/* Events Grid */
+.events-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr; /* Two equal columns */
+    gap: 30px;
+    flex-grow: 1;
+}
+
+.dashboard-card {
+    background-color: var(--card-bg);
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-card h3 {
+    font-size: 1.3em;
+    font-weight: 600;
+    color: var(--dark-text);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Nearest Events List */
+.event-list {
+    flex-grow: 1;
+    overflow-y: auto; /* Enable scrolling for long lists */
+}
+
+.event-list .event-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 0;
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.event-list .event-item:hover {
+    background-color: #f9f9f9;
+}
+
+.event-list .event-item:last-of-type {
+    border-bottom: none;
+}
+
+.event-list .event-details {
+    flex-grow: 1;
+}
+
+.event-list .event-title {
+    font-size: 1.0em;
+    font-weight: 500;
+    color: var(--dark-text);
+    margin-bottom: 3px;
+}
+
+.event-list .event-time {
+    font-size: 0.85em;
+    color: var(--light-text);
+}
+
+.event-list .event-tag {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 0.8em;
+    font-weight: 500;
+    margin-left: 15px;
+}
+
+.event-list .event-tag.work {
+    background-color: var(--tag-orange);
+    color: var(--tag-orange-text);
+}
+
+.event-list .event-tag.social {
+    background-color: var(--tag-blue);
+    color: var(--tag-blue-text);
+}
+
+.event-list .event-tag.meeting {
+    background-color: var(--tag-green);
+    color: var(--tag-green-text);
+}
+
+/* Calendar Styling */
+.calendar-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    font-size: 1.1em;
+    font-weight: 500;
+}
+
+.calendar-nav {
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 5px;
+    transition: background-color 0.2s ease;
+}
+
+.calendar-nav:hover {
+    background-color: #eee;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    text-align: center;
+    flex-grow: 1;
+}
+
+.calendar-grid .day-name {
+    font-weight: 600;
+    color: var(--primary-blue);
+    padding: 10px 0;
+}
+
+.calendar-grid .calendar-day {
+    padding: 10px 5px;
+    border-radius: 8px;
+    background-color: #fdfdfd;
+    min-height: 80px;
+    height: 100px; /* MODIFIED: SET A FIXED HEIGHT */
+    max-height: 100px; /* MODIFIED: SET A MAX HEIGHT */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    font-size: 0.9em;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    overflow: hidden; /* ADDED: Clip content if it exceeds the fixed height */
+}
+
+.calendar-grid .calendar-day:hover {
+    background-color: #eef;
+}
+
+.calendar-grid .calendar-day.inactive {
+    color: var(--light-text);
+    background-color: #f9f9f9;
+}
+
+.calendar-grid .calendar-day.today {
+    border: 2px solid var(--primary-blue);
+    font-weight: 600;
+}
+
+.calendar-grid .day-number {
+    font-weight: 500;
+    margin-bottom: 5px;
+    flex-shrink: 0; /* ADDED: Prevent day number from shrinking */
+}
+
+.calendar-grid .day-event {
+    background-color: var(--light-blue);
+    color: var(--primary-blue);
+    font-size: 0.75em;
+    padding: 3px 5px;
+    border-radius: 5px;
+    margin-top: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Ensures that long event names are truncated */
+    width: 90%;
+    text-align: left;
+    flex-shrink: 0; /* ADDED: Prevent event elements from shrinking */
+}
+
+/* ADDED: Style to cap the number of events shown in a day */
+.calendar-grid .calendar-day .day-event:nth-child(n+3) { /* Hides events beyond the second one (day-number is first child) */
+    display: none;
+}
+
+.calendar-grid .day-event.work {
+    background-color: var(--tag-orange);
+    color: var(--tag-orange-text);
+}
+.calendar-grid .day-event.social {
+    background-color: var(--tag-blue);
+    color: var(--tag-blue-text);
+}
+.calendar-grid .day-event.meeting {
+    background-color: var(--tag-green);
+    color: var(--tag-green-text);
+}
+
+/* Popup Styling (for both detail and add event popups) */
+.popup-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    padding: 20px; /* Add some padding around the popup itself */
+}
+
+.popup-content {
+    background-color: var(--card-bg);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+    animation: fadeIn 0.3s ease-out;
+    max-height: 90vh; /* Limit the maximum height of the popup to 90% of viewport height */
+    overflow-y: auto; /* ENABLE internal scrolling if content is too much */
+    display: flex; /* Use flexbox for internal layout */
+    flex-direction: column; /* Stack children vertically */
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Specific styling for the close 'x' button at the top right of the popup */
+.popup-content .close-popup-btn { /* This now targets the event detail popup's close button */
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 1.8em;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--light-text);
+    transition: color 0.2s ease;
+    z-index: 10; /* Ensure it's above other content */
+}
+
+.popup-content .close-popup-btn:hover {
+    color: var(--dark-text);
+}
+
+/* New style for the round close button for Add Event popup */
+.close-popup-btn-round {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--dark-text); /* Dark background */
+    color: #fff; /* White 'x' icon */
+    border: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.2em;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    z-index: 10;
+}
+
+.close-popup-btn-round:hover {
+    background-color: #555; /* Slightly lighter on hover */
+    transform: rotate(90deg); /* Rotate for a nice effect */
+}
+
+
+.popup-content h3 {
+    font-size: 1.8em;
+    color: var(--primary-blue);
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+    flex-shrink: 0;
+}
+
+.popup-content p { /* Applies to event detail popup, not add event form */
+    font-size: 1.05em;
+    margin-bottom: 10px;
+    color: var(--dark-text);
+    display: flex;
+    align-items: center;
+}
+
+.popup-content p i {
+    margin-right: 10px;
+    color: var(--medium-text);
+}
+
+.popup-content p span {
+    font-weight: 500;
+}
+
+.popup-actions {
+    margin-top: 30px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 20px;
+    flex-shrink: 0;
+}
+
+.popup-actions button {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 0.9em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.popup-actions button i {
+    margin-right: 8px;
+}
+
+.edit-event-btn {
+    background-color: var(--primary-blue);
+    color: #fff;
+    border: none;
+}
+
+.edit-event-btn:hover {
+    background-color: var(--sidebar-link-hover);
+}
+
+.delete-event-btn {
+    background-color: #ef4444;
+    color: #fff;
+    border: none;
+}
+
+.delete-event-btn:hover {
+    background-color: #dc2626;
+}
+
+/* Add Event Popup Specific Styles */
+#add-event-popup .popup-content h3 {
+    color: var(--primary-blue); /* Consistent styling */
+}
+
+#add-event-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    flex-grow: 1;
+    padding-right: 0; /* Remove padding-right that was meant for scrollbar */
+}
+
+#add-event-form label {
+    font-weight: 500;
+    color: var(--dark-text);
+    margin-bottom: 5px;
+    display: block;
+}
+
+#add-event-form input[type="text"],
+#add-event-form input[type="date"],
+#add-event-form input[type="time"],
+#add-event-form select,
+#add-event-form textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95em;
+    transition: border-color 0.2s ease;
+    padding-right: 40px; /* Ensure space for custom icon */
+}
+
+/* --- CRITICAL: Hide native calendar/time pickers and spin buttons --- */
+/* For Webkit (Chrome, Safari, Edge) */
+#add-event-form input[type="date"]::-webkit-calendar-picker-indicator,
+#add-event-form input[type="time"]::-webkit-calendar-picker-indicator {
+    background: transparent; /* Make background transparent */
+    color: transparent; /* Make icon color transparent */
+    cursor: pointer; /* Keep cursor as pointer */
+    width: 100%; /* Ensure it covers the input field for clickability */
+    height: 100%;
+    position: absolute; /* Position it absolutely within the input */
+    top: 0;
+    left: 0;
+    font-size: 0; /* Make sure no text/icon shows */
+    border: none; /* Remove any border */
+    box-sizing: border-box; /* Include padding/border in total width/height */
+}
+/* For Firefox */
+#add-event-form input[type="date"]::-moz-calendar-picker-indicator,
+#add-event-form input[type="time"]::-moz-calendar-picker-indicator {
+    background: transparent;
+    color: transparent;
+    cursor: pointer;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 0;
+    border: none;
+    box-sizing: border-box;
+}
+
+/* Hide up/down arrows for time input in Webkit */
+#add-event-form input[type="time"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+/* Hide up/down arrows for time input in Firefox */
+#add-event-form input[type="time"]::-moz-inner-spin-button {
+    -moz-appearance: none;
+    margin: 0;
+}
+
+
+#add-event-form input:focus,
+#add-event-form select:focus,
+#add-event-form textarea:focus {
+    border-color: var(--primary-blue);
+    outline: none;
+}
+
+#add-event-form textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+    position: relative; /* Crucial for positioning custom icons inside */
+    flex-shrink: 0; /* Prevent form groups from shrinking unnecessarily */
+}
+
+/* Styles for Font Awesome icons inside date and time inputs */
+.form-group .input-icon {
+    position: absolute;
+    right: 15px; /* Position our custom icon */
+    top: 50%; /* Center vertically of the entire form-group including label */
+    transform: translateY(calc(-50% + 15px)); /* Adjusted to align with input box */
+    color: var(--medium-text);
+    pointer-events: none; /* Make the icon unclickable itself, click passes to input */
+    font-size: 1.1em;
+    z-index: 1; /* Ensure custom icon is above the hidden native picker */
+}
+
+
+.add-event-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+    flex-shrink: 0;
+}
+
+#saveNewEventBtn {
+    background-color: var(--primary-blue);
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    display: flex; /* Added for icon alignment */
+    align-items: center; /* Added for icon alignment */
+    gap: 8px; /* Added for icon alignment */
+}
+
+#saveNewEventBtn:hover {
+    background-color: var(--sidebar-link-hover);
+}
+
+/* Modified Cancel button style */
+.cancel-add-event-btn {
+    background-color: var(--border-color); /* Light grey background */
+    color: var(--dark-text); /* Darker text */
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 0.9em;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    display: flex; /* Make it a flex container to align icon and text */
+    align-items: center;
+    gap: 8px; /* Space between icon and text */
+}
+
+.cancel-add-event-btn:hover {
+    background-color: #e0e0e0; /* Slightly darker grey on hover */
+}   

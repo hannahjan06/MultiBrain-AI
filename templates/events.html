@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Events Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="static\events.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fas fa-brain"></i> MultiBrain
+            </div>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="/"><i class="fas fa-th-large"></i> Dashboard</a></li>
+                    <li class="active"><a href="/events"><i class="fas fa-calendar-check"></i> Events</a></li>
+                    <li><a href="/auto_assign"><i class="fas fa-file-alt"></i> Transcribe</a></li>
+                    <li><a href="/employees_page"><i class="fas fa-users"></i> Employees</a></li>
+                    <li><a href="#"><i class="fas fa-user-circle"></i> Profile</a></li>
+                </ul>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <header class="header-top">
+                <div class="search-bar">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" placeholder="Search events...">
+                </div>
+            </header>
+
+            <section class="events-overview-section">
+                <div class="section-header">
+                    <h2>Events Overview</h2>
+                    <button class="add-event-btn"><i class="fas fa-plus"></i> Add Event</button>
+                </div>
+                <div class="events-grid">
+                    <div class="nearest-events-column dashboard-card">
+                        <h3>Nearest Events</h3>
+                        <div class="event-list" id="nearest-events-list">
+                            <!-- Nearest events will be loaded here -->
+                        </div>
+                    </div>
+                    <div class="calendar-column dashboard-card">
+                        <h3>Calendar</h3>
+                        <div class="calendar-header">
+                            <i class="fas fa-chevron-left calendar-nav" id="prevMonth"></i>
+                            <span id="currentMonthYear">September, 2020</span>
+                            <i class="fas fa-chevron-right calendar-nav" id="nextMonth"></i>
+                        </div>
+                        <div class="calendar-grid" id="calendar-grid">
+                            <!-- Calendar days and events will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Event Detail Popup -->
+    <div id="event-detail-popup" class="popup-overlay">
+        <div class="popup-content">
+            <button class="close-popup-btn">&times;</button>
+            <h3 id="popup-event-title"></h3>
+            <p><i class="fas fa-calendar-alt"></i> Date: <span id="popup-event-date"></span></p>
+            <p><i class="fas fa-clock"></i> Time: <span id="popup-event-time"></span></p>
+            <p><i class="fas fa-tag"></i> Category: <span id="popup-event-category"></span></p>
+            <p><i class="fas fa-info-circle"></i> Description: <span id="popup-event-description"></span></p>
+            <div class="popup-actions">
+                <button class="edit-event-btn"><i class="fas fa-edit"></i> Edit</button>
+                <button class="delete-event-btn"><i class="fas fa-trash-alt"></i> Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Event Popup -->
+    <div id="add-event-popup" class="popup-overlay">
+        <div class="popup-content">
+            <!-- Modified close button for add event popup -->
+            <button class="close-popup-btn-round" id="close-add-event-popup-btn-round"><i class="fas fa-times"></i></button>
+            <h3>Add New Event</h3>
+            <form id="add-event-form">
+                <div class="form-group">
+                    <label for="newEventTitle">Event Title:</label>
+                    <input type="text" id="newEventTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="newEventDate">Date:</label>
+                    <input type="date" id="newEventDate" required>
+                    <i class="fas fa-calendar-alt input-icon"></i> <!-- Added calendar icon -->
+                </div>
+                <div class="form-group">
+                    <label for="newEventTime">Time:</label>
+                    <input type="time" id="newEventTime" required>
+                    <i class="fas fa-clock input-icon"></i> <!-- Added clock icon -->
+                </div>
+                <div class="form-group">
+                    <label for="newEventCategory">Category:</label>
+                    <select id="newEventCategory" required>
+                        <option value="">Select a Category</option>
+                        <option value="work">Work</option>
+                        <option value="social">Social</option>
+                        <option value="meeting">Meeting</option>
+                        <!-- Add more categories as needed -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="newEventDescription">Description:</label>
+                    <textarea id="newEventDescription" rows="3"></textarea>
+                </div>
+                <div class="add-event-form-actions">
+                    <button type="button" class="cancel-add-event-btn"><i class="fas fa-times"></i> Cancel</button>
+                    <button type="submit" id="saveNewEventBtn"><i class="fas fa-save"></i> Save Event</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="static\events.js"></script>
+</body>
+</html>

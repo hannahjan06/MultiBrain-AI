@@ -1,78 +1,144 @@
-// (No changes needed from the previous version of dash.js)
 document.addEventListener('DOMContentLoaded', () => {
     const topEmployeesGrid = document.getElementById('top-employees-grid');
     const autoAssignBtn = document.getElementById('autoAssignBtn');
     const sidebarLinks = document.querySelectorAll('.sidebar .main-nav ul li a');
     const assignedTasksList = document.getElementById('assigned-tasks-list');
+    const viewAllWorkloadLink = document.getElementById('view-all-workload-link');
 
-    // Dummy data for top employees (Workload section)
-    const employeesData = [
-        { name: 'Shawn Stone', position: 'UI/UX Designer', avatar: 'https://i.pravatar.cc/150?img=3', completedAssignments: 16 },
-        { name: 'Blake Silva', position: 'iOS Developer', avatar: 'https://i.pravatar.cc/150?img=4', completedAssignments: 20 },
-        { name: 'Emily Tyler', position: 'Copywriter', avatar: 'https://i.pravatar.cc/150?img=1', completedAssignments: 18 },
-        { name: 'Randy Delgado', position: 'UI/UX Designer', avatar: 'https://i.pravatar.cc/150?img=5', completedAssignments: 22 },
-        { name: 'Millie Harvey', position: 'Android Developer', avatar: 'https://i.pravatar.cc/150?img=6', completedAssignments: 15 },
-    ];
+    // Dummy data for tasks removed, now fetched from backend.
 
-    // Dummy data for tasks (Tasks section)
-    const tasksData = [
-        { name: 'Review and approve marketing strategy', date: 'Nov 18, 2023', assigneeAvatar: 'https://i.pravatar.cc/150?img=10', priority: 'high' },
-        { name: 'Conduct market research for new product', date: 'Nov 20, 2023', assigneeAvatar: 'https://i.pravatar.cc/150?img=11', priority: 'medium' },
-        { name: 'Finalize Q4 budget report', date: 'Nov 22, 2023', assigneeAvatar: 'https://i.pravatar.cc/150?img=12', priority: 'high' },
-        { name: 'Prepare presentation for client meeting', date: 'Nov 25, 2023', assigneeAvatar: 'https://i.pravatar.cc/150?img=13', priority: 'low' },
-        { name: 'Update website content for holiday promo', date: 'Nov 28, 2023', assigneeAvatar: 'https://i.pravatar.cc/150?img=14', priority: 'medium' },
-    ];
+    // Function to fetch and render Workload (Top Employees) from backend
+    async function fetchAndRenderWorkload() {
+        if (!topEmployeesGrid) return; // Exit if grid element not found
 
+        try {
+            const response = await fetch('/employees'); // Fetch from your backend /employees endpoint
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const employees = await response.json();
 
-    // Function to render Workload (Top Employees)
-    function renderWorkload() {
-        if (topEmployeesGrid) {
+            // Sort employees by completed tasks in descending order
+            const sortedEmployees = employees.sort((a, b) => b.total_completed_tasks - a.total_completed_tasks);
+
             topEmployeesGrid.innerHTML = ''; // Clear existing cards
-            employeesData.forEach(employee => {
+            sortedEmployees.slice(0, 5).forEach(employee => { // Display top 5 employees
                 const employeeItem = document.createElement('div');
                 employeeItem.classList.add('employee-item');
+
+                // Use a random avatar for now if backend doesn't provide one
+                const avatarUrl = employee.avatar || `https://i.pravatar.cc/150?img=${(employee.id % 70) + 1}`; // Simple random based on ID
+
                 employeeItem.innerHTML = `
-                    <img src="${employee.avatar}" alt="${employee.name}" class="employee-avatar">
+                    <img src="${avatarUrl}" alt="${employee.name}" class="employee-avatar">
                     <div class="employee-details">
                         <p class="employee-name">${employee.name}</p>
                         <p class="employee-position">${employee.position}</p>
                     </div>
-                    <span class="completed-tasks">${employee.completedAssignments} tasks</span>
+                    <span class="completed-tasks">${employee.total_completed_tasks || 0} tasks</span>
                 `;
                 topEmployeesGrid.appendChild(employeeItem);
             });
+        } catch (error) {
+            console.error('Error fetching employees for workload:', error);
+            // Optionally, display an error message to the user on the dashboard
+            topEmployeesGrid.innerHTML = '<p class="error-message">Failed to load employee workload data.</p>';
         }
     }
 
-    // Function to render Tasks
-    function renderTasks() {
-        if (assignedTasksList) {
+    // New: Function to fetch and render Tasks from backend
+    async function fetchAndRenderTasks() {
+        if (!assignedTasksList) return; // Exit if list element not found
+
+        try {
+            const response = await fetch('/assignments'); // Fetch from your backend /assignments endpoint
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const tasks = await response.json();
+
             assignedTasksList.innerHTML = ''; // Clear existing tasks
-            tasksData.forEach(task => {
+
+            // Display a limited number of tasks, e.g., the first 5 or 10
+            tasks.slice(0, 7).forEach(task => { // Limiting to 7 tasks for brevity on dashboard
                 const taskItem = document.createElement('div');
                 taskItem.classList.add('task-item');
+
+                // Determine priority class (you'll need to define how priority is determined or if it comes from backend)
+                // For demonstration, let's assume if deadline is present, it's medium, else low.
+                // You might need to adjust this based on how your backend stores 'priority' or 'status'.
+                let priorityClass = 'priority-low'; // Default low
+                if (task.status === 'pending' && task.deadline) {
+                    // Simple logic: if pending and has deadline, consider it medium
+                    priorityClass = 'priority-medium';
+                    // You could add more complex logic, e.g., check if deadline is soon for 'high'
+                } else if (task.status === 'pending') {
+                    // Still pending, but no deadline, might be low
+                    priorityClass = 'priority-low';
+                } else if (task.status === 'complete') {
+                    // Completed tasks usually don't need a priority indicator on a pending list
+                    return; // Skip rendering completed tasks in this dashboard section
+                }
+
+
+                // Fetch employee data to get avatar if task has an assigned_employee_id
+                let assigneeAvatar = '';
+                let assigneeName = 'Unassigned';
+
+                if (task.assigned_employee_id) {
+                    // This would ideally be optimized on the backend to avoid N+1 queries.
+                    // For now, we'll simulate a simple random avatar for assigned tasks
+                    // Or, if your /employees endpoint also included avatars, we could match.
+                    // For a more robust solution, the /assignments endpoint should include assignee details.
+                    assigneeAvatar = `https://i.pravatar.cc/150?img=${(task.assigned_employee_id % 70) + 1}`; // Simple random based on assignee ID
+                    // If you want real names, you'd need to fetch employees separately and map,
+                    // or have the backend /assignments endpoint include assignee name/avatar.
+                } else if (task.ai_assignee) {
+                    assigneeName = task.ai_assignee + ' (AI)';
+                    assigneeAvatar = `https://i.pravatar.cc/150?img=${(task.id % 70) + 20}`; // Another random for AI
+                } else {
+                    assigneeAvatar = `https://i.pravatar.cc/150?img=70`; // Generic for truly unassigned
+                }
+
                 taskItem.innerHTML = `
-                    <span class="task-priority-indicator priority-${task.priority}"></span>
+                    <span class="task-priority-indicator ${priorityClass}"></span>
                     <div class="task-details">
-                        <p class="task-name">${task.name}</p>
-                        <span class="task-date">${task.date}</span>
+                        <p class="task-name">${task.description}</p>
+                        <span class="task-date">${task.deadline || 'No deadline'}</span>
                     </div>
-                    <img src="${task.assigneeAvatar}" alt="Assignee" class="task-assignee-avatar">
+                    <img src="${assigneeAvatar}" alt="${assigneeName}" class="task-assignee-avatar">
                 `;
                 assignedTasksList.appendChild(taskItem);
             });
+
+            // If no tasks are found or none are pending
+            if (tasks.filter(t => t.status === 'pending').length === 0) {
+                 assignedTasksList.innerHTML = '<p class="no-tasks">No pending tasks found.</p>';
+            }
+
+        } catch (error) {
+            console.error('Error fetching tasks for dashboard:', error);
+            assignedTasksList.innerHTML = '<p class="error-message">Failed to load tasks data.</p>';
         }
     }
 
 
     // Initial render calls
-    renderWorkload();
-    renderTasks();
+    fetchAndRenderWorkload(); // Call the async function to load real employee data
+    fetchAndRenderTasks(); // New: Call the async function to load real task data
 
     // Add click listener for the Auto assign button
     if (autoAssignBtn) {
         autoAssignBtn.addEventListener('click', () => {
             window.location.href = '/auto_assign'; // Redirect to the /auto_assign route
+        });
+    }
+
+    // Now correctly targeting the "View All" link by its ID
+    if (viewAllWorkloadLink) {
+        viewAllWorkloadLink.addEventListener('click', (event) => {
+            event.preventDefault(); // Prevent default link behavior (#)
+            window.location.href = '/employees_page'; // Redirect to the /employees_page
         });
     }
 
@@ -88,6 +154,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const linkText = this.textContent.trim();
             if (linkText.includes('Dashboard')) {
                 window.location.href = '/';
+            } else if (linkText.includes('Events')) { // Add this condition for the new Events link
+                window.location.href = 'events.html'; // Redirect to the new events page
             } else if (linkText.includes('Transcribe')) {
                 window.location.href = '/auto_assign';
             } else if (linkText.includes('Employees')) {
@@ -107,7 +175,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (
             (currentPath === '/' && linkText.includes('Dashboard')) ||
             (currentPath === '/auto_assign' && linkText.includes('Transcribe')) ||
-            (currentPath === '/employees_page' && linkText.includes('Employees'))
+            (currentPath === '/employees_page' && linkText.includes('Employees')) ||
+            (currentPath.includes('events.html') && linkText.includes('Events')) // Add this for events.html
         ) {
             link.parentElement.classList.add('active');
         }

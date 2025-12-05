@@ -6,18 +6,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeButton = document.querySelector('.close-button');
     const addEmployeeForm = document.getElementById('addEmployeeForm');
 
-    // Dummy data for employees
-    // Changed to 'total_pending_tasks' and 'total_completed_tasks'
-    let employees = [
-        { id: 1, name: 'Shawn Stone', role: 'UI/UX Designer', position: 'Designer', email: 'shawn@example.com', avatar: 'https://i.pravatar.cc/150?img=3', total_pending_tasks: 5, total_completed_tasks: 25 },
-        { id: 2, name: 'Randy Delgado', role: 'UI/UX Designer', position: 'Designer', email: 'randy@example.com', avatar: 'https://i.pravatar.cc/150?img=4', total_pending_tasks: 10, total_completed_tasks: 30 },
-        { id: 3, name: 'Emily Tyler', role: 'Copywriter', position: 'Writer', email: 'emily@example.com', avatar: 'https://i.pravatar.cc/150?img=1', total_pending_tasks: 3, total_completed_tasks: 18 },
-        { id: 4, name: 'Louis Castro', role: 'Copywriter', position: 'Writer', email: 'louis@example.com', avatar: 'https://i.pravatar.cc/150?img=5', total_pending_tasks: 7, total_completed_tasks: 22 },
-        { id: 5, name: 'Millie Harvey', role: 'Android Developer', position: 'Developer', email: 'millie@example.com', avatar: 'https://i.pravatar.cc/150?img=6', total_pending_tasks: 2, total_completed_tasks: 15 },
-        { id: 6, name: 'Ethel Weber', role: 'Copywriter', position: 'Writer', email: 'ethel@example.com', avatar: 'https://i.pravatar.cc/150?img=7', total_pending_tasks: 9, total_completed_tasks: 28 },
-        { id: 7, name: 'Charlie Palmer', role: 'Copywriter', position: 'Writer', email: 'charlie@example.com', avatar: 'https://i.pravatar.cc/150?img=8', total_pending_tasks: 4, total_completed_tasks: 20 },
-        { id: 8, name: 'Pual Sims', role: 'Project Manager', position: 'Manager', email: 'pual@example.com', avatar: 'https://i.pravatar.cc/150?img=9', total_pending_tasks: 1, total_completed_tasks: 10 },
-    ];
+    let employees = []; // Initialize as empty, data will come from the backend
+
+    async function fetchEmployees() {
+        try {
+            const response = await fetch('/employees');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            employees = await response.json();
+            renderEmployees();
+        } catch (error) {
+            console.error('Error fetching employees:', error);
+            // Optionally, display an error message to the user
+        }
+    }
 
     function renderEmployees() {
         employeeGrid.innerHTML = ''; // Clear existing cards
@@ -25,7 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const employeeCard = document.createElement('div');
             employeeCard.classList.add('employee-card');
 
-            // Use font-awesome icon if no avatar URL provided or if it fails
+            // Use a default avatar if none is provided or if you want consistent styling
+            // For now, we'll assume the backend provides a valid avatar URL or we use a Font Awesome icon.
             const avatarContent = employee.avatar ? `<img src="${employee.avatar}" alt="${employee.name}" class="avatar">` : `<i class="fas fa-user-circle avatar"></i>`;
 
             employeeCard.innerHTML = `
@@ -44,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="stat-value">${employee.total_completed_tasks}</div>
                         <div class="stat-label">Completed</div>
                     </div>
-                    </div>
+                </div>
             `;
             employeeGrid.appendChild(employeeCard);
         });
@@ -69,28 +73,49 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Handle form submission (for dummy data, just add to array)
-    addEmployeeForm.addEventListener('submit', (event) => {
+    // Handle form submission to add a new employee
+    addEmployeeForm.addEventListener('submit', async (event) => {
         event.preventDefault(); // Prevent default form submission
 
-        const newEmployee = {
-            id: employees.length + 1, // Simple ID generation
+        const newEmployeeData = {
             name: document.getElementById('employeeName').value,
             role: document.getElementById('employeeRole').value,
             position: document.getElementById('employeePosition').value,
             email: document.getElementById('employeeEmail').value,
-            avatar: 'https://i.pravatar.cc/150?img=' + (Math.floor(Math.random() * 70) + 10), // Random avatar
-            total_pending_tasks: 0, // Initialize new employees with 0 pending
-            total_completed_tasks: 0, // Initialize new employees with 0 completed
+            // Avatar will be handled by the backend or set to a default
+            // total_pending_tasks and total_completed_tasks will be initialized by the backend
         };
 
-        employees.push(newEmployee); // Add new employee to our dummy array
-        renderEmployees(); // Re-render the grid with the new employee
-        addEmployeeModal.style.display = 'none'; // Close modal
-        addEmployeeForm.reset(); // Clear the form
+        try {
+            const response = await fetch('/employees', { // POST request to /employees
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newEmployeeData),
+            });
 
-        alert('New employee added (frontend only for now)!'); // For demonstration
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+            }
+
+            const addedEmployee = await response.json(); // Backend should return the newly added employee
+            console.log('New employee added:', addedEmployee);
+
+            // Re-fetch all employees to ensure the UI is up-to-date with the new data
+            await fetchEmployees(); 
+
+            addEmployeeModal.style.display = 'none'; // Close modal
+            addEmployeeForm.reset(); // Clear the form
+
+            alert('New employee added successfully!');
+        } catch (error) {
+            console.error('Error adding new employee:', error);
+            alert(`Failed to add employee: ${error.message}`);
+        }
     });
 
-    renderEmployees(); // Initial render of employees
-}); 
+    // Initial fetch and render of employees when the page loads
+    fetchEmployees();
+});
