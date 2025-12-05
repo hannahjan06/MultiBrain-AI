@@ -1,13 +1,13 @@
-<h1 align="center">MultiBrain-AI</h1>
+<h1 align="center">MULTIBRAIN-AI</h1>
 
 <p align="center">
   Turning messy meetings into organized tasks, timelines, and ownership.
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/github/last-commit/hannahjan06/MultiBrain-AI" alt="last commit">
-  <img src="https://img.shields.io/github/languages/top/hannahjan06/MultiBrain-AI?color=2b7489&label=top%20language" alt="top language">
-  <img src="https://img.shields.io/github/languages/count/hannahjan06/MultiBrain-AI?label=languages" alt="languages">
+  <img src="https://img.shields.io/github/last-commit/hannahjan06/MULTIBRAIN" alt="last commit">
+  <img src="https://img.shields.io/github/languages/top/hannahjan06/MULTIBRAIN?color=2b7489&label=top%20language" alt="top language">
+  <img src="https://img.shields.io/github/languages/count/hannahjan06/MULTIBRAIN?label=languages" alt="languages">
 </p>
 
 <p align="center">
@@ -24,200 +24,130 @@
 
 ---
 
-## 🧠 Overview
+## Overview
 
-**MultiBrain-AI** is an AI-powered meeting management dashboard that turns raw meeting recordings or transcripts into structured tasks, assignments, and calendar events.
+**MULTIBRAIN-AI** is an AI-powered meeting and workload dashboard.  
+It turns meeting recordings or transcripts into structured tasks, assigns them to employees, syncs events to a calendar, and notifies the right people by email.
 
 You can:
 
-- Upload **audio recordings** or **transcript files**
-- Let **Whisper** transcribe recordings
-- Use **Ollama (LLaMA 2)** to extract actionable tasks as structured JSON
-- Drag-and-drop / select tasks and assign them to employees
-- Automatically send **email reminders** to assignees
-- Manage events in a **calendar view**
-- Track **workload, pending tasks, and completed tasks** per employee
-- Filter and update task status directly from the dashboard
-
-All of this is backed by a **Flask** app, **SQLite** database, and a clean dashboard UI.
-
----
-
-## ✨ Core Features
-
-### 1. 🗓 Event & Calendar Management
-- Create events with:
-  - Title
-  - Date
-  - Time
-  - Category (e.g. meeting)
-  - Description
-- Events are stored in the backend (`Event` model) and exposed via:
-  - `GET /api/events` – fetch all events
-  - `POST /api/events` – create a new event
-- Events are displayed on a **calendar view** in the dashboard so managers can see upcoming meetings and activities at a glance.
+- Add **events** and see them in a calendar-style view.
+- Upload **audio recordings** or **transcripts** from meetings.
+- Let **Whisper** transcribe recordings.
+- Use **Ollama (LLaMA 2)** to extract actionable tasks.
+- Assign tasks to employees from the UI.
+- Track each employee’s **pending vs completed tasks**.
+- Filter and update task status.
+- Automatically send:
+  - notification emails to the **whole team** when a new event is added,
+  - reminder emails to the **specific assignee** when tasks are created.
 
 ---
 
-### 2. 🤖 Auto Task Extraction (Whisper + Ollama)
+## Features
 
-You can go to the **Auto Assign** page (`/auto_assign`) and:
+### Event & Calendar Management
+- Create events with title, date, time, category and description.
+- Events are stored in the backend and rendered in the calendar view (`events.html`).
+- Every new event can trigger an email notification so the full team knows what’s coming up.
 
+### AI Task Extraction (Whisper + Ollama)
 - Upload either:
-  - **Recording** (`.mp3`, `.wav`)
-  - **Transcript** (`.txt`, `.pdf`, `.docx`)
-- Select the file type (`recording` or `transcript`)
+  - a **recording** (`.mp3`, `.wav`) or  
+  - a **transcript** (`.txt`, `.pdf`, `.docx`).
+- Whisper is used to transcribe audio files.
+- The transcript is sent to **Ollama** with a strict JSON prompt.
+- Ollama returns a list of tasks with:
+  - description  
+  - suggested assignee + confidence  
+  - deadline  
+  - source quotes
+- Tasks are stored in SQLite (`Task` + `Meeting` models).
 
-Then the app will:
+### Employee & Workload View
+- Employee list with name, role, position, email, avatar.
+- For each employee you can see:
+  - total pending tasks  
+  - total completed tasks  
+- You can view all tasks for a specific employee.
 
-1. **Transcribe** audio using `whisper` (for recording files)
-2. **Analyse** the transcript using **Ollama** with a custom prompt:
-   - Extracts tasks in the JSON format:
-     ```json
-     {
-       "tasks": [
-         {
-           "id": "T1",
-           "assignee": "John Doe",
-           "assignee_confidence": 0.8,
-           "description": "Follow up with client on proposal",
-           "deadline": "2023-04-01",
-           "source_quotes": ["Some quote from the transcript"]
-         }
-       ]
-     }
-     ```
-3. Saves:
-   - The **meeting** (`Meeting` model)
-   - All AI-generated **tasks** (`Task` model)
+### Task Management & Filters
+- See all tasks in the **Tasks** page with:
+  - description  
+  - status (pending / complete)  
+  - AI-assignee + confidence  
+  - deadline  
+  - linked meeting file
+- Filter tasks by status (pending / complete).
+- Change status from the UI (calls `PUT /tasks/<id>/status`).
 
-These tasks are then available to be assigned and managed via the dashboard.
-
----
-
-### 3. 👤 Employee Dashboard & Workload
-
-The app includes an `Employee` model and an **Employees page** where you can:
-
-- View all employees with:
-  - Name
-  - Role
-  - Position
-  - Email
-  - Avatar
-- See **per-employee stats**:
-  - `total_pending_tasks`
-  - `total_completed_tasks`
-- Check tasks assigned to a specific employee via:
-  - `GET /employees/<id>/tasks`
-
-When the app boots for the first time, it automatically creates **dummy employees** and **dummy tasks** so the dashboard isn’t empty.
+### Email Notifications
+- For AI-generated tasks, the app groups tasks by assignee and sends them a reminder email with:
+  - task list  
+  - deadlines  
+  - short message.
+- When you create new events, you can notify the whole team so they don’t miss any important meeting.
+- Uses Gmail SMTP over SSL.
 
 ---
 
-### 4. ✅ Task Management & Filtering
-
-From the **Tasks page** (`/tasks_page`) you can:
-
-- View **all tasks** from all meetings
-- See:
-  - Description
-  - AI-suggested assignee and confidence
-  - Deadline
-  - Source quotes
-  - Assigned employee
-  - Status (pending / complete)
-  - Meeting file name
-- Filter tasks by **status** (pending / complete) in the UI
-- Update task status via:
-  - `PUT /tasks/<task_id>/status` with body:
-    ```json
-    {
-      "status": "pending" | "complete"
-    }
-    ```
-
----
-
-### 5. 📨 Email Notifications
-
-For each meeting, once tasks are generated and assigned, the app can:
-
-- Group tasks by employee
-- Send them an email with:
-  - List of tasks
-  - Deadlines
-  - Polite reminder message
-
-Emails are sent using:
-
-- `smtplib` + `ssl`
-- Gmail’s SMTP (`smtp.gmail.com:465`)
-
-You configure sender credentials via environment variables.
-
----
-
-## 🏗 Tech Stack
-
-- **Backend:** Flask
-- **Database:** SQLite (`multibrain.db`) via SQLAlchemy
-- **AI:**
-  - OpenAI **Whisper** (local model) for audio transcription
-  - **Ollama** running `llama2:latest` for task extraction
-- **Email:** Gmail SMTP via `smtplib`
-- **Others:** `requests`, `python-dotenv`, `whisper`, `Werkzeug` for file handling
-
----
-
-## 📁 Project Structure (High-level)
-
-*(Adjust to match your actual repo layout if needed)*
+## Project Structure
 
 ```bash
 .
-├── app.py                 # Main Flask app (the file shown above)
-├── multibrain.db          # SQLite database (auto-created)
-├── uploads/               # Uploaded files (audio / transcripts)
-├── templates/
-│   ├── dash.html          # Dashboard
-│   ├── events.html        # Events calendar page
-│   ├── tasks.html         # Tasks page
-│   └── employee.html      # Employee page
-├── static/                # CSS / JS / assets (if any)
+├── app.py
 ├── requirements.txt
-└── README.md
+├── .env                # local environment variables (not committed)
+├── .gitignore
+├── static/
+│   ├── dash.css
+│   ├── dash.js
+│   ├── employee.css
+│   ├── employee.js
+│   ├── events.css
+│   ├── events.js
+│   ├── script.js
+│   ├── style.css
+│   ├── tasks.css
+│   └── tasks.js
+├── templates/
+│   ├── dash.html       # main dashboard
+│   ├── employee.html   # employees view
+│   ├── events.html     # calendar / events page
+│   ├── index.html      # auto-assign / upload page
+│   └── tasks.html      # tasks list + filters
+└── uploads/
+    └── sample-0.mp3    # sample meeting recording
 ````
 
 ---
 
-## ⚙️ Setup & Installation
+## Setup & Installation
 
-### Clone the Repository
+### Clone the Repo
 
 ```bash
-git clone https://github.com/hannahjan06/MultiBrain-AI.git
-cd MultiBrain-AI
+git clone https://github.com/hannahjan06/MULTIBRAIN.git
+cd MULTIBRAIN
 ```
-
-*(Update URL to your actual repo.)*
 
 ---
 
-### Create & Activate Virtual Environment (Recommended)
+### Create & Activate Virtual Env (Optional but recommended)
 
 ```bash
 python -m venv venv
-source venv/bin/activate  # macOS / Linux
-# or
-venv\Scripts\activate     # Windows
+# macOS / Linux
+source venv/bin/activate
+# Windows
+venv\Scripts\activate
 ```
 
 ---
 
-### Install Python Dependencies
+### Install Dependencies
 
-Make sure you have `requirements.txt` with:
+`requirements.txt` should look roughly like:
 
 ```txt
 Flask
@@ -228,94 +158,72 @@ openai-whisper
 python-dotenv
 ```
 
-Then run:
+Then install:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-> 💡 Depending on your system, `whisper` may also require `ffmpeg`.
-> On most systems you can install it via your package manager (e.g., `brew install ffmpeg` on macOS).
+> ⚠️ Whisper may require `ffmpeg`.
+> Example (macOS): `brew install ffmpeg`
+> Linux: use your package manager (`apt`, `dnf`, etc).
 
 ---
 
-### Install & Configure Ollama
+### Install & Run Ollama
 
-This app uses **Ollama** locally to run `llama2`.
+1. Download **Ollama** from its official site and install it.
+2. Start Ollama (it will listen on `http://localhost:11434`).
+3. Pull the LLaMA 2 model:
 
-1. **Download Ollama**
-
-   * Install Ollama from its official website for your OS.
-
-2. **Start the Ollama server**
-
-   Usually just running Ollama will start the local server at:
-
-   ```text
-   http://localhost:11434
-   ```
-
-3. **Pull the LLaMA 2 model**
-
-   In your terminal:
-
-   ```bash
-   ollama pull llama2
-   ```
-
-4. **(Optional) Test the model**
-
-   ```bash
-   ollama run llama2
-   ```
-
-The Flask app expects to talk to Ollama at:
-
-```text
-POST http://localhost:11434/api/generate
+```bash
+ollama pull llama2
 ```
 
-with the model name:
+4. (Optional) Test it:
+
+```bash
+ollama run llama2
+```
+
+The app expects:
 
 ```json
 "model": "llama2:latest"
 ```
 
-Make sure Ollama is running before you start the Flask app.
+and uses `POST http://localhost:11434/api/generate`.
 
 ---
 
-### Environment Variables (.env)
+### Configure Environment Variables
 
-Create a `.env` file in the project root and add:
+Create a `.env` file in the repo root:
 
 ```env
 UNIQUE_KEY=some_random_secret_key
+
 EMAIL_ADDRESS=your_email@gmail.com
-EMAIL_PASSWORD=your_app_password
+EMAIL_PASSWORD=your_app_specific_password
 ```
 
-* `UNIQUE_KEY` – Flask secret key for sessions
-* `EMAIL_ADDRESS` – Gmail address used to send task reminder emails
-* `EMAIL_PASSWORD` – **App password**, not your regular login password
-  (for Gmail you need to enable 2FA and create an app-specific password)
+* `UNIQUE_KEY` → Flask `SECRET_KEY`
+* `EMAIL_ADDRESS` / `EMAIL_PASSWORD` → used for SMTP to send notifications.
+  For Gmail, enable 2FA and generate an **App Password** (don’t use your real login password).
 
 ---
 
-### Initialize the Database & Run the App
-
-The app auto-creates tables and some dummy data on first run.
+### Run the App
 
 ```bash
 python app.py
 ```
 
-You should see logs like:
+On first run, the app will:
 
-* “Adding dummy employees…”
-* “Dummy employees added.”
-* “Adding dummy tasks for workload…”
-* “Dummy tasks added.”
+* create `multibrain.db`
+* add dummy employees
+* add some dummy tasks for workload visualisation
 
 Then open:
 
@@ -325,159 +233,38 @@ http://127.0.0.1:5000/
 
 ---
 
-## Usage Flow
+## Typical Flow
 
-### Dashboard (`/`)
+1. **Create events** in the Events page
+   → events stored in DB and your whole team gets notified.
 
-* Overview of the app
-* Quick navigation to:
+2. **Upload a recording or transcript** in the Auto Assign page
+   → Whisper transcribes (if audio), Ollama extracts JSON tasks.
 
-  * Events / Calendar
-  * Employees
-  * Tasks
-  * Auto Assign (AI flow)
+3. **Review AI tasks**
+   → check descriptions, deadlines, suggested assignees.
 
----
+4. **Assign tasks to employees**
+   → app links tasks to `Employee` records and emails each person their list.
 
-### Events Page (`/events`)
+5. **Track progress**
 
-* View event calendar (backed by `/api/events`)
-* Add new events via the UI (which call `POST /api/events`)
-* Events stored in `Event` model with:
-
-  * `title`, `date`, `time`, `category`, `description`
+   * Dashboard shows workload.
+   * Tasks page lets you filter pending/complete.
+   * Change statuses as work is done.
 
 ---
 
-### Auto Assign (AI Task Extraction) (`/auto_assign`)
+## Future Ideas
 
-1. Go to the Auto Assign page.
-
-2. Upload a file:
-
-   * Meeting recording (`.mp3` / `.wav`)
-   * Transcript (`.txt`, `.pdf`, `.docx`)
-
-3. Select file type:
-
-   * `recording` → audio is transcribed using Whisper
-   * `transcript` → file is read directly
-
-4. Backend:
-
-   * Saves file to `/uploads`
-   * Creates a `Meeting` row with:
-
-     * `file_name`
-     * `transcript`
-   * Calls **Ollama** with a strict JSON prompt
-   * Parses API response and saves each **Task** assigned to that meeting
-
-5. In the UI:
-
-   * You can see AI-suggested tasks and assignees.
-   * You can confirm / change assignments (e.g., via drag-and-drop or select dropdowns).
-   * Once assignments are saved, the backend updates `assigned_employee_id` for each `Task`.
-
-6. Email reminders:
-
-   * The app groups tasks by employee and sends them a summary email with their tasks and deadlines.
+* Speaker diarization (who said what).
+* Integration with Google Calendar / Outlook.
+* Per-project boards instead of only per-employee view.
+* Role-based access (manager vs employee dashboards).
 
 ---
 
-### Employees Page (`/employees_page`)
+Built for people who hate manual notes, forgotten tasks, and “what did we decide in that meeting??” energy.
 
-* View the list of employees with:
-
-  * Name, role, position, email, avatar
-* See **stats per employee**:
-
-  * `total_pending_tasks`
-  * `total_completed_tasks`
-* Click into an employee to see all tasks assigned to them (via `GET /employees/<id>/tasks`).
-
----
-
-### Tasks Page (`/tasks_page`)
-
-* View all tasks in the system with:
-
-  * Description
-  * Status (pending / complete)
-  * AI-assigned person + confidence
-  * Deadline
-  * Meeting file name
-* Use filters in the UI to:
-
-  * Show only **pending** tasks
-  * Show only **completed** tasks
-* Update task status via the UI (which calls `PUT /tasks/<id>/status`).
-
----
-
-## 🔌 Key API Endpoints (Backend)
-
-* `GET /` – Main dashboard
-* `GET /events` – Events page
-* `GET /tasks_page` – Tasks page
-* `GET /employees_page` – Employees page
-* `GET /auto_assign` – Auto assign UI
-
-**Tasks**
-
-* `POST /tasks` – Create new task manually
-* `GET /tasks` – Get all tasks
-* `PUT /tasks/<task_id>/status` – Update task status
-
-**Employees**
-
-* `GET /employees` – Get all employees with stats
-* `POST /employees` – Create employee
-* `GET /employees/<employee_id>/tasks` – Get one employee’s tasks
-
-**Assignments**
-
-* `GET /assignments` – Get all task + assignee info
-* `POST /assignments` – Save manual task→employee assignments
-* `GET /get_final_assignments` – Get assignments for current meeting (from session)
-
-**Events**
-
-* `GET /api/events` – Get all events
-* `POST /api/events` – Create new event
-
----
-
-## Development Notes
-
-* Whisper is loaded as:
-
-  ```python
-  whisper_model = whisper.load_model("base", device="cpu")
-  ```
-
-  * CPU-only by default; change `device` if you have GPU.
-* Some warnings are disabled:
-
-  ```python
-  warnings.filterwarnings("ignore", message="FP16 is not supported on CPU*")
-  ```
-* Uploaded files are stored under the `uploads/` folder (created if missing).
-
----
-
-## Future Improvements
-
-* Speaker diarization (who said what in the meeting)
-* Richer analytics on the dashboard (per-team, per-project views)
-* Multi-tenant support (multiple companies using one instance)
-* Integration with external calendar APIs (Google Calendar, Outlook, etc.)
-* Role-based access control (manager vs employee views)
-
----
-
-## Credits
-
-Built with way too much coffee, Python, and a dangerous amount of curiosity.
-AI stack: **Whisper + Ollama (LLaMA 2)**.
-Backend: **Flask + SQLite + SQLAlchemy**.
+```
+```
