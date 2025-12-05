@@ -1,22 +1,25 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => { // Made async for initial fetch
+
+    // --- DOM Element References ---
     const nearestEventsList = document.getElementById('nearest-events-list');
     const calendarGrid = document.getElementById('calendar-grid');
     const currentMonthYearSpan = document.getElementById('currentMonthYear');
     const prevMonthBtn = document.getElementById('prevMonth');
     const nextMonthBtn = document.getElementById('nextMonth');
+
+    // Event Detail Popup elements
     const eventDetailPopup = document.getElementById('event-detail-popup');
-    const closePopupBtn = document.querySelector('.close-popup-btn'); // This now targets the event detail popup's close button
+    const closePopupBtn = document.querySelector('.close-popup-btn');
     const popupEventTitle = document.getElementById('popup-event-title');
     const popupEventDate = document.getElementById('popup-event-date');
     const popupEventTime = document.getElementById('popup-event-time');
     const popupEventCategory = document.getElementById('popup-event-category');
     const popupEventDescription = document.getElementById('popup-event-description');
 
-    // New elements for Add Event Popup
+    // Add Event Popup elements
     const addEventBtn = document.querySelector('.add-event-btn');
     const addEventPopup = document.getElementById('add-event-popup');
-    // Renamed and re-targeted for the new round close button
-    const closeAddEventPopupBtnRound = document.getElementById('close-add-event-popup-btn-round'); 
+    const closeAddEventPopupBtnRound = document.getElementById('close-add-event-popup-btn-round');
     const addEventForm = document.getElementById('add-event-form');
     const newEventTitleInput = document.getElementById('newEventTitle');
     const newEventDateInput = document.getElementById('newEventDate');
@@ -24,30 +27,82 @@ document.addEventListener('DOMContentLoaded', () => {
     const newEventCategorySelect = document.getElementById('newEventCategory');
     const newEventDescriptionInput = document.getElementById('newEventDescription');
     const saveNewEventBtn = document.getElementById('saveNewEventBtn');
-    // New variable for the cancel button in the add event form
     const cancelAddEventBtn = document.querySelector('.cancel-add-event-btn');
 
 
-    // Dummy Data for Events
-    let dummyEvents = [
-        // Change all dates to December 2025
-        { id: 1, title: "Team Sync", date: "2025-12-04", time: "10:00", category: "meeting", description: "Weekly team synchronization meeting." },
-        { id: 4, title: "Client Presentation", date: "2025-12-18", time: "11:00", category: "work", description: "Final client presentation for the year." },
-    ];
-
+    // --- State Variables ---
     let currentMonth = new Date().getMonth();
     let currentYear = new Date().getFullYear();
+    let allEvents = []; // This will now hold the fetched event data
 
-    // Function to render Nearest Events
-    function renderNearestEvents() {
+
+    // --- API Interaction Functions ---
+
+    /**
+     * Fetches all events from the backend API.
+     * @returns {Array} An array of event objects, or an empty array on error.
+     */
+    async function fetchEvents() {
+        try {
+            const response = await fetch('/api/events');
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+            }
+            const events = await response.json();
+            return events;
+        } catch (error) {
+            console.error("Error fetching events:", error);
+            // alert('Failed to load events. Please check server connection.'); // Optional: user feedback
+            return [];
+        }
+    }
+
+    /**
+     * Adds a new event to the backend API.
+     * @param {Object} eventData - The data for the new event.
+     * @returns {Object|null} The newly created event object from the backend, or null on error.
+     */
+    async function addEvent(eventData) {
+        try {
+            const response = await fetch('/api/events', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(eventData)
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+            }
+
+            const savedEvent = await response.json();
+            return savedEvent;
+        } catch (error) {
+            console.error("Error saving new event:", error);
+            alert('Failed to save event. Please try again.');
+            return null;
+        }
+    }
+
+
+    // --- Rendering Functions ---
+
+    /**
+     * Renders the nearest upcoming events.
+     * @param {Array} events - The array of all events to process.
+     */
+    function renderNearestEvents(events) {
         nearestEventsList.innerHTML = '';
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        const sortedEvents = dummyEvents
-            .filter(event => new Date(event.date) >= today) // Only future events
-            .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()) // Sort by date
-            .slice(0, 5); // Display top 5 nearest events
+        const sortedEvents = events
+            .filter(event => new Date(event.date) >= today)
+            .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+            .slice(0, 5);
 
         if (sortedEvents.length === 0) {
             nearestEventsList.innerHTML = '<p style="text-align: center; color: var(--light-text); margin-top: 20px;">No upcoming events.</p>';
@@ -57,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
         sortedEvents.forEach(event => {
             const eventItem = document.createElement('div');
             eventItem.classList.add('event-item');
-            eventItem.dataset.eventId = event.id; // Store event ID for popup
+            eventItem.dataset.eventId = event.id;
 
             const eventDate = new Date(event.date);
             const dateString = eventDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
@@ -74,13 +129,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Function to render Calendar
-    function renderCalendar(month, year) {
+    /**
+     * Renders the calendar grid for a specific month and year.
+     * @param {number} month - The month (0-11).
+     * @param {number} year - The full year.
+     * @param {Array} events - The array of all events to display.
+     */
+    function renderCalendar(month, year, events) {
         calendarGrid.innerHTML = '';
         const firstDay = new Date(year, month, 1);
         const lastDay = new Date(year, month + 1, 0);
         const daysInMonth = lastDay.getDate();
-        const startDayIndex = firstDay.getDay(); // 0 for Sunday, 1 for Monday, etc.
+        const startDayIndex = firstDay.getDay();
 
         currentMonthYearSpan.textContent = new Date(year, month).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
@@ -103,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
         for (let day = 1; day <= daysInMonth; day++) {
             const dayElement = document.createElement('div');
             dayElement.classList.add('calendar-day');
-            dayElement.dataset.date = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`; // YYYY-MM-DD
+            dayElement.dataset.date = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
             dayElement.innerHTML = `<div class="day-number">${day}</div>`;
 
             const today = new Date();
@@ -112,7 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Add events for this day
-            const eventsOnThisDay = dummyEvents.filter(event => {
+            const eventsOnThisDay = events.filter(event => {
                 const eventDate = new Date(event.date);
                 return eventDate.getDate() === day && eventDate.getMonth() === month && eventDate.getFullYear() === year;
             });
@@ -121,7 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const eventSpan = document.createElement('span');
                 eventSpan.classList.add('day-event', event.category);
                 eventSpan.textContent = event.title;
-                eventSpan.dataset.eventId = event.id; // Store event ID
+                eventSpan.dataset.eventId = event.id;
                 dayElement.appendChild(eventSpan);
             });
 
@@ -129,55 +189,73 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Function to display event details in a popup
-    function showEventDetailPopup(eventId) {
-        const event = dummyEvents.find(e => e.id == eventId);
-        if (!event) return;
+    /**
+     * Displays event details in a popup.
+     * @param {number} eventId - The ID of the event to display.
+     * @param {Array} events - The array of all events to search within.
+     */
+    function showEventDetailPopup(eventId, events) {
+        const event = events.find(e => e.id == eventId);
+        if (!event) {
+            console.error("Event not found with ID:", eventId);
+            return;
+        }
 
         popupEventTitle.textContent = event.title;
         popupEventDate.textContent = new Date(event.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
         popupEventTime.textContent = event.time;
         popupEventCategory.textContent = event.category.charAt(0).toUpperCase() + event.category.slice(1);
         popupEventDescription.textContent = event.description;
+        // Apply class based on category for styling
+        popupEventCategory.className = ''; // Clear existing classes
+        popupEventCategory.classList.add(event.category);
+
 
         eventDetailPopup.style.display = 'flex';
     }
 
+
+    // --- Event Handlers ---
+
+    // Function to re-render all components after data changes
+    async function refreshEventsAndUI() {
+        allEvents = await fetchEvents(); // Update global allEvents
+        renderNearestEvents(allEvents);
+        renderCalendar(currentMonth, currentYear, allEvents);
+    }
+
     // Handle calendar navigation
-    prevMonthBtn.addEventListener('click', () => {
+    prevMonthBtn.addEventListener('click', async () => {
         currentMonth--;
         if (currentMonth < 0) {
             currentMonth = 11;
             currentYear--;
         }
-        renderCalendar(currentMonth, currentYear);
+        await refreshEventsAndUI(); // Re-fetch and re-render
     });
 
-    nextMonthBtn.addEventListener('click', () => {
+    nextMonthBtn.addEventListener('click', async () => {
         currentMonth++;
         if (currentMonth > 11) {
             currentMonth = 0;
             currentYear++;
         }
-        renderCalendar(currentMonth, currentYear);
+        await refreshEventsAndUI(); // Re-fetch and re-render
     });
 
-    // Delegate event listener for nearest events list and calendar grid
+    // Delegate event listener for nearest events list and calendar grid to show detail popup
     document.addEventListener('click', (event) => {
-        // For Nearest Events List
         const eventItem = event.target.closest('.nearest-events-column .event-item');
-        if (eventItem && eventItem.dataset.eventId) {
-            showEventDetailPopup(eventItem.dataset.eventId);
-        }
-
-        // For Calendar Day Events
         const dayEvent = event.target.closest('.calendar-grid .day-event');
-        if (dayEvent && dayEvent.dataset.eventId) {
-            showEventDetailPopup(dayEvent.dataset.eventId);
+
+        if (eventItem && eventItem.dataset.eventId) {
+            showEventDetailPopup(eventItem.dataset.eventId, allEvents);
+        } else if (dayEvent && dayEvent.dataset.eventId) {
+            showEventDetailPopup(dayEvent.dataset.eventId, allEvents);
         }
     });
 
-    // Close event detail popup (original 'x' button)
+    // Close event detail popup
     closePopupBtn.addEventListener('click', () => {
         eventDetailPopup.style.display = 'none';
     });
@@ -185,25 +263,28 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Add Event Popup Logic ---
     addEventBtn.addEventListener('click', () => {
         addEventForm.reset(); // Clear form fields
+        // Set default date to today for convenience if desired
+        const today = new Date();
+        newEventDateInput.value = today.toISOString().split('T')[0];
+        newEventTimeInput.value = '09:00'; // Default time
         addEventPopup.style.display = 'flex';
     });
 
-    // Close add event popup (new round 'x' button)
+    // Close add event popup (round 'x' button)
     closeAddEventPopupBtnRound.addEventListener('click', () => {
         addEventPopup.style.display = 'none';
     });
 
-    // Close add event popup (new 'Cancel' button in the form)
+    // Close add event popup ('Cancel' button in the form)
     cancelAddEventBtn.addEventListener('click', () => {
         addEventPopup.style.display = 'none';
     });
 
-    saveNewEventBtn.addEventListener('click', (event) => {
+    // Save New Event button handler
+    saveNewEventBtn.addEventListener('click', async (event) => {
         event.preventDefault(); // Prevent default form submission
 
-        const newId = dummyEvents.length > 0 ? Math.max(...dummyEvents.map(e => e.id)) + 1 : 1;
-        const newEvent = {
-            id: newId,
+        const newEventData = {
             title: newEventTitleInput.value,
             date: newEventDateInput.value,
             time: newEventTimeInput.value,
@@ -211,17 +292,19 @@ document.addEventListener('DOMContentLoaded', () => {
             description: newEventDescriptionInput.value,
         };
 
-        if (newEvent.title && newEvent.date && newEvent.time && newEvent.category) {
-            dummyEvents.push(newEvent);
-            addEventPopup.style.display = 'none';
-            renderNearestEvents(); // Re-render to show new event
-            renderCalendar(currentMonth, currentYear); // Re-render calendar
+        if (newEventData.title && newEventData.date && newEventData.time && newEventData.category) {
+            const savedEvent = await addEvent(newEventData); // Call API to add event
+            if (savedEvent) {
+                addEventPopup.style.display = 'none';
+                await refreshEventsAndUI(); // Re-fetch and re-render
+            }
         } else {
             alert('Please fill in all required fields: Title, Date, Time, and Category.');
         }
     });
 
-    // Initial render for the events page
-    renderNearestEvents();
-    renderCalendar(currentMonth, currentYear);
+
+    // --- Initial Load ---
+    // Fetch events and render UI when the DOM is fully loaded
+    await refreshEventsAndUI();
 });

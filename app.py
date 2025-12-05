@@ -123,6 +123,25 @@ class Task(db.Model):
     assigned_employee_id = db.Column(db.Integer, db.ForeignKey('employees.id'))
     status = db.Column(db.String(20), nullable=False, default='pending')
 
+class Event(db.Model):
+    __tablename__ = 'events'
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(255), nullable=False)
+    date = db.Column(db.String(50), nullable=False)
+    time = db.Column(db.String(50), nullable=False)
+    category = db.Column(db.String(20), nullable=False, default='meeting')
+    description = db.Column(db.Text, nullable=True)
+
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'date': self.date,
+            'time': self.time,
+            'category': self.category,
+            'description': self.description
+        }
+
 class Employee(db.Model):
     __tablename__ = 'employees'
     id = db.Column(db.Integer, primary_key=True)
@@ -215,6 +234,10 @@ def is_text_file(filename):
 def dashboard():
     return render_template('dash.html')
 
+@app.route('/tasks_page', methods=['GET'])
+def tasks_page():
+    return render_template('tasks.html')
+
 @app.route('/employees_page', methods=['GET'])
 def employees_page():
     return render_template('employee.html')
@@ -226,6 +249,68 @@ def auto_assign():
 @app.route('/events', methods=['GET'])
 def events():
     return render_template('events.html')
+
+@app.route('/tasks', methods=['POST'])
+def add_new_task():
+    data = request.json
+    
+    description = data.get('description')
+    deadline = data.get('deadline')
+    assigned_employee_id = data.get('assigned_employee_id')
+
+    if not description:
+        return jsonify({'success': False, 'message': 'Task description is required'}), 400
+
+    new_task = Task(
+        description=description,
+        deadline=deadline,
+        assigned_employee_id=assigned_employee_id,
+        status='pending',
+        meeting_id=1
+    )
+    
+    db.session.add(new_task)
+    try:
+        db.session.commit()
+        return jsonify({
+            'id': new_task.id,
+            'description': new_task.description,
+            'deadline': new_task.deadline,
+            'status': new_task.status,
+            'assigned_employee_id': new_task.assigned_employee_id,
+            'meeting_file_name': new_task.meeting.file_name if new_task.meeting else None
+        }), 201
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error adding new task: {e}")
+        return jsonify({'success': False, 'message': 'Failed to add new task to database'}), 500
+
+@app.route('/tasks/<int:task_id>/status', methods=['PUT'])
+def update_task_status(task_id):
+    task = Task.query.get(task_id)
+    if not task:
+        return jsonify({'success': False, 'message': 'Task not found'}), 404
+    
+    data = request.json
+    new_status = data.get('status')
+
+    if new_status not in ['pending', 'complete']:
+        return jsonify({'success': False, 'message': 'Invalid status provided'}), 400
+    
+    task.status = new_status
+    try:
+        db.session.commit()
+        return jsonify({
+            'id': task.id,
+            'description': task.description,
+            'status': task.status,
+            'deadline': task.deadline,
+            'assigned_employee_id': task.assigned_employee_id
+        }), 200
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error updating task status: {e}")
+        return jsonify({'success': False, 'message': 'Failed to update task status in database'}), 500
 
 @app.route('/auto_assign', methods=['POST'])
 def upload_file():
@@ -487,6 +572,59 @@ def get_final_assignments():
 
     return jsonify(final_assignments)
 
+@app.route('/api/events', methods=['GET'])
+def get_events():
+    events = Event.query.all()
+    return jsonify([event.to_dict() for event in events]), 200
+
+@app.route('/api/events', methods=['POST'])
+def create_event():
+    data = request.json
+
+    if not data:
+        return jsonify({'success': False, 'message': 'No data provided'}), 400
+    
+    try:
+        title = data.get('title')
+        date = data.get('date')
+        time = data.get('time')
+        category = data.get('category')
+        description = data.get('description')
+    except Exception as e:
+        jsonify({'success': False, 'message': 'Missing required event field'}), 400
+    
+    new_event = Event(title=title, date=date, time=time, category=category, description=description)
+    db.session.add(new_event)
+
+    try:
+        db.session.commit()
+        return jsonify(new_event.to_dict()), 201
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error adding event: {e}")
+        return jsonify({'success': False, 'message': 'Failed to add event to database'}), 500
+
+@app.route('/employees/<int:employee_id>/tasks', methods=['GET'])
+def get_employee_tasks(employee_id):
+    employee = Employee.query.get(employee_id)
+    if not employee:
+        return jsonify({'message': 'Employee not found'}), 404
+
+    tasks = []
+    for task in employee.tasks:
+        tasks.append({
+            'id': task.id,
+            'description': task.description,
+            'deadline': task.deadline,
+            'status': task.status,
+            'meeting_id': task.meeting_id,
+            'meeting_file_name': task.meeting.file_name if task.meeting else 'N/A'
+        })
+    return jsonify(tasks), 200
+
+if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
@@ -500,6 +638,42 @@ if __name__ == '__main__':
             employee5 = Employee(name="Robert Green", role="Sales", email="robert@example.com")
             db.session.add_all([employee1, employee2, employee3, employee4, employee5])
             db.session.commit()
-            print("Dummy employees added.") 
+            print("Dummy employees added.")
 
+        # NEW: Add some dummy events if none exist
+        if Event.query.count() == 0:
+            print("Adding dummy events...")
+            event1 = Event(title="Presentation of the new department", date="Today", time="3:00 PM", category="work")
+            event2 = Event(title="Anna's Birthday", date="Today", time="6:00 PM", category="social")
+            event3 = Event(title="Ray's Meeting", date="Tomorrow", time="2:00 PM", category="meeting")
+            event4 = Event(title="Project Kick-off", date="25/03", time="10:00 AM", category="work")
+            event5 = Event(title="Team Lunch", date="26/03", time="1:00 PM", category="social")
+            db.session.add_all([event1, event2, event3, event4, event5])
+            db.session.commit()
+            print("Dummy events added.")
+
+        # NEW: Add some dummy tasks and assign them to employees for workload testing
+        if Task.query.count() == 0:
+            print("Adding dummy tasks for workload...")
+            meeting1 = Meeting(file_name="Meeting_Alpha.mp3", transcript="Transcript for Alpha meeting.")
+            meeting2 = Meeting(file_name="Meeting_Beta.mp3", transcript="Transcript for Beta meeting.")
+            db.session.add_all([meeting1, meeting2])
+            db.session.flush() # Ensure meetings get IDs before assigning tasks
+
+            # Employee 1 (John Doe) tasks
+            task1 = Task(meeting_id=meeting1.id, description="Design landing page mockups", ai_assignee="John Doe", deadline="2023-03-28", assigned_employee_id=1, status="pending")
+            task2 = Task(meeting_id=meeting1.id, description="Review user flows", ai_assignee="John Doe", deadline="2023-03-29", assigned_employee_id=1, status="pending")
+            task3 = Task(meeting_id=meeting2.id, description="Create design system components", ai_assignee="John Doe", deadline="2023-03-30", assigned_employee_id=1, status="complete")
+
+            # Employee 2 (Jane Smith) tasks
+            task4 = Task(meeting_id=meeting1.id, description="Develop iOS login screen", ai_assignee="Jane Smith", deadline="2023-03-27", assigned_employee_id=2, status="pending")
+            task5 = Task(meeting_id=meeting2.id, description="Implement push notifications", ai_assignee="Jane Smith", deadline="2023-04-01", assigned_employee_id=2, status="pending")
+
+            # Employee 3 (Peter Jones) tasks
+            task6 = Task(meeting_id=meeting1.id, description="Write website copy", ai_assignee="Peter Jones", deadline="2023-03-28", assigned_employee_id=3, status="complete")
+            task7 = Task(meeting_id=meeting2.id, description="Proofread marketing materials", ai_assignee="Peter Jones", deadline="2023-03-29", assigned_employee_id=3, status="pending")
+            
+            db.session.add_all([task1, task2, task3, task4, task5, task6, task7])
+            db.session.commit()
+            print("Dummy tasks added.")
     app.run(debug=True)

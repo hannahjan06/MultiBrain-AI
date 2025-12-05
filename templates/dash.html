@@ -19,7 +19,7 @@
                     <li><a href="/events"><i class="fas fa-calendar-check"></i> Events</a></li>
                     <li><a href="/auto_assign"><i class="fas fa-file-alt"></i> Transcribe</a></li>
                     <li><a href="/employees_page"><i class="fas fa-users"></i> Employees</a></li>
-                    <li><a href="#"><i class="fas fa-user-circle"></i> Profile</a></li>
+                    <li><a href="/tasks_page"><i class="fas fa-user-circle"></i> Tasks</a></li>
                 </ul>
             </nav>
         </aside>
@@ -46,34 +46,14 @@
                 <section class="dashboard-card nearest-events-section">
                     <div class="card-header">
                         <h3>Nearest Events</h3>
-                        <a href="#" class="view-all-link">View All</a>
+                        <a href="#" class="view-all-link" id="view-all-events-link">View All</a> <!-- Added ID -->
                     </div>
                     <div class="event-list">
-                        <div class="event-item">
-                            <div class="event-details">
-                                <p class="event-title">Presentation of the new department</p>
-                                <span class="event-time">Today | 3:00 PM</span>
-                            </div>
-                            <span class="event-tag orange">Work</span>
-                        </div>
-                        <div class="event-item">
-                            <div class="event-details">
-                                <p class="event-title">Anna's Birthday</p>
-                                <span class="event-time">Today | 6:00 PM</span>
-                            </div>
-                            <span class="event-tag blue">Social</span>
-                        </div>
-                        <div class="event-item">
-                            <div class="event-details">
-                                <p class="event-title">Ray's Meeting</p>
-                                <span class="event-time">Tomorrow | 2:00 PM</span>
-                            </div>
-                            <span class="event-tag green">Meeting</span>
-                        </div>
-                        <!-- More events can be added here -->
+                        <!-- Event items will be dynamically inserted here -->
+                        <!-- Removed dummy events from here -->
                     </div>
                 </section>
-            </div> <!-- End top-sections-grid -->
+            </div>
 
             <!-- Tasks Section -->
             <section class="dashboard-card tasks-section full-width-task-section">

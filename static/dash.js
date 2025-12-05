@@ -1,15 +1,17 @@
+// ... (existing imports) ...
+
 document.addEventListener('DOMContentLoaded', () => {
     const topEmployeesGrid = document.getElementById('top-employees-grid');
+    const nearestEventsList = document.querySelector('.nearest-events-section .event-list'); // Get the event list container
     const autoAssignBtn = document.getElementById('autoAssignBtn');
     const sidebarLinks = document.querySelectorAll('.sidebar .main-nav ul li a');
     const assignedTasksList = document.getElementById('assigned-tasks-list');
     const viewAllWorkloadLink = document.getElementById('view-all-workload-link');
-
-    // Dummy data for tasks removed, now fetched from backend.
+    const viewAllEventsLink = document.querySelector('.nearest-events-section .view-all-link'); // Get the 'View All' link for events
 
     // Function to fetch and render Workload (Top Employees) from backend
     async function fetchAndRenderWorkload() {
-        if (!topEmployeesGrid) return; // Exit if grid element not found
+        if (!topEmployeesGrid) return;
 
         try {
             const response = await fetch('/employees'); // Fetch from your backend /employees endpoint
@@ -18,16 +20,15 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             const employees = await response.json();
 
-            // Sort employees by completed tasks in descending order
-            const sortedEmployees = employees.sort((a, b) => b.total_completed_tasks - a.total_completed_tasks);
+            // Sort employees by total_pending_tasks (highest first) for workload
+            const sortedEmployees = employees.sort((a, b) => b.total_pending_tasks - a.total_pending_tasks);
 
             topEmployeesGrid.innerHTML = ''; // Clear existing cards
             sortedEmployees.slice(0, 5).forEach(employee => { // Display top 5 employees
                 const employeeItem = document.createElement('div');
                 employeeItem.classList.add('employee-item');
 
-                // Use a random avatar for now if backend doesn't provide one
-                const avatarUrl = employee.avatar || `https://i.pravatar.cc/150?img=${(employee.id % 70) + 1}`; // Simple random based on ID
+                const avatarUrl = employee.avatar || `https://i.pravatar.cc/150?img=${(employee.id % 70) + 1}`;
 
                 employeeItem.innerHTML = `
                     <img src="${avatarUrl}" alt="${employee.name}" class="employee-avatar">
@@ -35,67 +36,117 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p class="employee-name">${employee.name}</p>
                         <p class="employee-position">${employee.position}</p>
                     </div>
-                    <span class="completed-tasks">${employee.total_completed_tasks || 0} tasks</span>
-                `;
+                    <span class="completed-tasks">${employee.total_pending_tasks || 0} pending</span>
+                `; // Changed to 'pending'
                 topEmployeesGrid.appendChild(employeeItem);
             });
+
+            if (sortedEmployees.length === 0) {
+                topEmployeesGrid.innerHTML = '<p class="no-data">No employee workload data available.</p>';
+            }
+
         } catch (error) {
             console.error('Error fetching employees for workload:', error);
-            // Optionally, display an error message to the user on the dashboard
             topEmployeesGrid.innerHTML = '<p class="error-message">Failed to load employee workload data.</p>';
         }
     }
 
+    // NEW: Function to fetch and render Nearest Events from backend
+    async function fetchAndRenderEvents() {
+        if (!nearestEventsList) return;
+
+        try {
+            const response = await fetch('/api/events'); // Fetch from your backend /api/events endpoint
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const events = await response.json();
+
+            nearestEventsList.innerHTML = ''; // Clear existing events
+
+            // Limit to a few nearest events, e.g., the first 3 or 4
+            events.slice(0, 4).forEach(event => {
+                const eventItem = document.createElement('div');
+                eventItem.classList.add('event-item');
+
+                let tagClass = '';
+                if (event.category === 'work') {
+                    tagClass = 'orange';
+                } else if (event.category === 'social') {
+                    tagClass = 'blue';
+                } else if (event.category === 'meeting') {
+                    tagClass = 'green';
+                }
+                // You can add more categories and colors here
+
+                eventItem.innerHTML = `
+                    <div class="event-details">
+                        <p class="event-title">${event.title}</p>
+                        <span class="event-time">${event.date} | ${event.time}</span>
+                    </div>
+                    <span class="event-tag ${tagClass}">${event.category}</span>
+                `;
+                nearestEventsList.appendChild(eventItem);
+            });
+
+            if (events.length === 0) {
+                nearestEventsList.innerHTML = '<p class="no-data">No upcoming events.</p>';
+            }
+
+        } catch (error) {
+            console.error('Error fetching events:', error);
+            nearestEventsList.innerHTML = '<p class="error-message">Failed to load events data.</p>';
+        }
+    }
+
     // New: Function to fetch and render Tasks from backend
+    // ... (This function remains largely the same, but ensure it fetches *pending* tasks for the dashboard) ...
     async function fetchAndRenderTasks() {
-        if (!assignedTasksList) return; // Exit if list element not found
+        if (!assignedTasksList) return;
 
         try {
             const response = await fetch('/assignments'); // Fetch from your backend /assignments endpoint
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            const tasks = await response.json();
+            const allTasks = await response.json();
 
             assignedTasksList.innerHTML = ''; // Clear existing tasks
 
-            // Display a limited number of tasks, e.g., the first 5 or 10
-            tasks.slice(0, 7).forEach(task => { // Limiting to 7 tasks for brevity on dashboard
+            const pendingTasks = allTasks.filter(t => t.status === 'pending');
+
+            // Display a limited number of pending tasks, e.g., the first 7
+            pendingTasks.slice(0, 7).forEach(task => {
                 const taskItem = document.createElement('div');
                 taskItem.classList.add('task-item');
 
-                // Determine priority class (you'll need to define how priority is determined or if it comes from backend)
-                // For demonstration, let's assume if deadline is present, it's medium, else low.
-                // You might need to adjust this based on how your backend stores 'priority' or 'status'.
-                let priorityClass = 'priority-low'; // Default low
-                if (task.status === 'pending' && task.deadline) {
-                    // Simple logic: if pending and has deadline, consider it medium
-                    priorityClass = 'priority-medium';
-                    // You could add more complex logic, e.g., check if deadline is soon for 'high'
-                } else if (task.status === 'pending') {
-                    // Still pending, but no deadline, might be low
-                    priorityClass = 'priority-low';
-                } else if (task.status === 'complete') {
-                    // Completed tasks usually don't need a priority indicator on a pending list
-                    return; // Skip rendering completed tasks in this dashboard section
+                let priorityClass = 'priority-low';
+                // Example: If a task has a deadline within the next 7 days, consider it medium priority.
+                // This would require parsing the deadline into a Date object for accurate comparison.
+                // For simplicity, let's just use a basic logic or assume backend provides a priority.
+                if (task.deadline) {
+                    const today = new Date();
+                    const deadlineDate = new Date(task.deadline); // Assuming deadline is in YYYY-MM-DD format
+                    const diffTime = deadlineDate.getTime() - today.getTime();
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                    if (diffDays <= 3) { // Deadline in 3 days or less
+                        priorityClass = 'priority-high';
+                    } else if (diffDays <= 7) { // Deadline in 7 days or less
+                        priorityClass = 'priority-medium';
+                    }
                 }
 
 
-                // Fetch employee data to get avatar if task has an assigned_employee_id
                 let assigneeAvatar = '';
                 let assigneeName = 'Unassigned';
 
-                if (task.assigned_employee_id) {
-                    // This would ideally be optimized on the backend to avoid N+1 queries.
-                    // For now, we'll simulate a simple random avatar for assigned tasks
-                    // Or, if your /employees endpoint also included avatars, we could match.
-                    // For a more robust solution, the /assignments endpoint should include assignee details.
-                    assigneeAvatar = `https://i.pravatar.cc/150?img=${(task.assigned_employee_id % 70) + 1}`; // Simple random based on assignee ID
-                    // If you want real names, you'd need to fetch employees separately and map,
-                    // or have the backend /assignments endpoint include assignee name/avatar.
+                if (task.assignee_avatar) { // Use avatar provided by the backend /assignments endpoint
+                    assigneeAvatar = task.assignee_avatar;
+                    assigneeName = task.assignee_name;
                 } else if (task.ai_assignee) {
                     assigneeName = task.ai_assignee + ' (AI)';
-                    assigneeAvatar = `https://i.pravatar.cc/150?img=${(task.id % 70) + 20}`; // Another random for AI
+                    assigneeAvatar = `https://i.pravatar.cc/150?img=${(task.id % 70) + 20}`; // Fallback random for AI
                 } else {
                     assigneeAvatar = `https://i.pravatar.cc/150?img=70`; // Generic for truly unassigned
                 }
@@ -111,8 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 assignedTasksList.appendChild(taskItem);
             });
 
-            // If no tasks are found or none are pending
-            if (tasks.filter(t => t.status === 'pending').length === 0) {
+            if (pendingTasks.length === 0) {
                  assignedTasksList.innerHTML = '<p class="no-tasks">No pending tasks found.</p>';
             }
 
@@ -125,7 +175,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initial render calls
     fetchAndRenderWorkload(); // Call the async function to load real employee data
-    fetchAndRenderTasks(); // New: Call the async function to load real task data
+    fetchAndRenderEvents();  // NEW: Call to load real event data
+    fetchAndRenderTasks(); // Call the async function to load real task data
 
     // Add click listener for the Auto assign button
     if (autoAssignBtn) {
@@ -142,6 +193,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // NEW: Add click listener for "View All" events link
+    if (viewAllEventsLink) {
+        viewAllEventsLink.addEventListener('click', (event) => {
+            event.preventDefault();
+            window.location.href = '/events'; // Redirect to the /events page
+        });
+    }
+
+
     // Add click listener for sidebar links
     sidebarLinks.forEach(link => {
         link.addEventListener('click', function(event) {
@@ -155,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (linkText.includes('Dashboard')) {
                 window.location.href = '/';
             } else if (linkText.includes('Events')) { // Add this condition for the new Events link
-                window.location.href = 'events.html'; // Redirect to the new events page
+                window.location.href = '/events'; // Redirect to the new events page (Python route)
             } else if (linkText.includes('Transcribe')) {
                 window.location.href = '/auto_assign';
             } else if (linkText.includes('Employees')) {
@@ -176,7 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
             (currentPath === '/' && linkText.includes('Dashboard')) ||
             (currentPath === '/auto_assign' && linkText.includes('Transcribe')) ||
             (currentPath === '/employees_page' && linkText.includes('Employees')) ||
-            (currentPath.includes('events.html') && linkText.includes('Events')) // Add this for events.html
+            (currentPath === '/events' && linkText.includes('Events')) // Updated for '/events' route
         ) {
             link.parentElement.classList.add('active');
         }
