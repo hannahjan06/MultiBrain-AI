@@ -164,9 +164,9 @@ Then install:
 pip install -r requirements.txt
 ```
 
-> ⚠️ Whisper may require `ffmpeg`.
-> Example (macOS): `brew install ffmpeg`
-> Linux: use your package manager (`apt`, `dnf`, etc).
+> ⚠️ Whisper may require `ffmpeg`.  
+> Example (macOS): `brew install ffmpeg`  
+> Linux: use your package manager (`apt`, `dnf`, etc).  
 
 ---
 
@@ -266,6 +266,6 @@ http://127.0.0.1:5000/
 
 ## Credits
 
-Built with way too much coffee, Python, and curiosity.
-AI stack: **Whisper + Ollama (LLaMA 2)**
-Backend: **Flask + SQLite + SQLAlchemy**
+Built with way too much coffee, Python, and curiosity.  
+AI stack: **Whisper + Ollama (LLaMA 2)**  
+Backend: **Flask + SQLite + SQLAlchemy**  
