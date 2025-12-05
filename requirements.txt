@@ -1,0 +1,6 @@
+Flask
+Flask_SQLAlchemy
+Werkzeug
+requests
+openai-whisper
+python-dotenv
